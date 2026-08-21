@@ -6,6 +6,7 @@
 #include <strsafe.h>
 
 #include <algorithm>
+#include <cwchar>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -173,7 +174,9 @@ namespace Rectify12::SystemActions {
             data.insert(data.end(), exclusion.begin(), exclusion.end());
             data.push_back(L'\0');
         }
+        // REG_MULTI_SZ must always end with two NUL characters, including an empty list.
         data.push_back(L'\0');
+        if (data.size() == 1) data.push_back(L'\0');
 
         HKEY key = nullptr;
         DWORD disposition = 0;
@@ -298,11 +301,12 @@ namespace Rectify12::SystemActions {
     inline Result ImportSettings(const std::filesystem::path& file) {
         std::wifstream in(file);
         if (!in) {
-            return {
-                false,
-                std::filesystem::exists(file) ? ERROR_OPEN_FAILED : ERROR_FILE_NOT_FOUND,
-                L"Could not open the Rectify12 settings file."
-            };
+            std::error_code existsError;
+            const bool exists = std::filesystem::exists(file, existsError);
+            const DWORD openError = existsError
+                ? static_cast<DWORD>(existsError.value())
+                : (exists ? static_cast<DWORD>(ERROR_OPEN_FAILED) : static_cast<DWORD>(ERROR_FILE_NOT_FOUND));
+            return { false, openError, L"Could not open the Rectify12 settings file." };
         }
 
         std::wstring line;
@@ -323,9 +327,10 @@ namespace Rectify12::SystemActions {
             if (key.rfind(L"Effects.", 0) == 0) {
                 const std::wstring valueName = key.substr(8);
                 try {
-                    const unsigned long parsed = std::stoul(value);
-                    if (parsed > MAXDWORD) {
-                        return { false, ERROR_INVALID_DATA, L"A Rectify12 effect setting is outside the DWORD range." };
+                    std::size_t parsedCharacters = 0;
+                    const unsigned long parsed = std::stoul(value, &parsedCharacters, 10);
+                    if (parsedCharacters != value.size() || parsed > MAXDWORD) {
+                        return { false, ERROR_INVALID_DATA, L"A Rectify12 effect setting contains an invalid DWORD value." };
                     }
                     const DWORD number = static_cast<DWORD>(parsed);
                     if (!IsAllowedEffectSetting(valueName, number)) {
@@ -386,20 +391,29 @@ namespace Rectify12::SystemActions {
         const std::filesystem::path rectifyRoot = windowsDirectory.empty()
             ? std::filesystem::path{}
             : std::filesystem::path(windowsDirectory) / L"Rectify12";
+        std::error_code rectifyError;
+        const bool rectifyExists = !rectifyRoot.empty() && std::filesystem::exists(rectifyRoot, rectifyError);
         items.push_back({
             L"Rectify12 installation",
-            !rectifyRoot.empty() && std::filesystem::exists(rectifyRoot),
-            rectifyRoot.empty() ? L"Windows directory could not be resolved." : rectifyRoot.wstring()
+            rectifyExists && !rectifyError,
+            rectifyRoot.empty()
+                ? L"Windows directory could not be resolved."
+                : (rectifyError ? L"The install directory could not be inspected." : rectifyRoot.wstring())
         });
 
         const std::wstring programData = EnvironmentValue(L"ProgramData");
         const std::filesystem::path windhawkMods = programData.empty()
             ? std::filesystem::path{}
             : std::filesystem::path(programData) / L"Windhawk" / L"Engine" / L"Mods";
+        std::error_code windhawkError;
+        const bool windhawkExists = !windhawkMods.empty() && std::filesystem::exists(windhawkMods, windhawkError);
         items.push_back({
             L"Windhawk modules",
-            !windhawkMods.empty() && std::filesystem::exists(windhawkMods),
-            windhawkMods.empty() ? L"ProgramData could not be resolved." : windhawkMods.wstring() });
+            windhawkExists && !windhawkError,
+            windhawkMods.empty()
+                ? L"ProgramData could not be resolved."
+                : (windhawkError ? L"The Windhawk modules directory could not be inspected." : windhawkMods.wstring())
+        });
 
         DWORD effectsEnabled = 0;
         const bool hasEffectsState = ReadDword(L"Software\\Rectify12\\Effects", L"Enabled", effectsEnabled);
@@ -416,10 +430,14 @@ namespace Rectify12::SystemActions {
         const std::filesystem::path explorerPath = windowsDirectory.empty()
             ? std::filesystem::path{}
             : std::filesystem::path(windowsDirectory) / L"explorer.exe";
+        std::error_code explorerError;
+        const bool explorerExists = !explorerPath.empty() && std::filesystem::exists(explorerPath, explorerError);
         items.push_back({
             L"Windows Explorer",
-            !explorerPath.empty() && std::filesystem::exists(explorerPath),
-            explorerPath.empty() ? L"Windows directory could not be resolved." : explorerPath.wstring()
+            explorerExists && !explorerError,
+            explorerPath.empty()
+                ? L"Windows directory could not be resolved."
+                : (explorerError ? L"Explorer could not be inspected." : explorerPath.wstring())
         });
 
         return items;
