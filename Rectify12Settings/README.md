@@ -6,8 +6,9 @@ Target stack:
 
 - C++/WinRT
 - WinUI 3
-- Windows App SDK 2.3.1
-- Microsoft.Windows.CppWinRT 3.0.260715.1
+- Windows App SDK 2.4.0
+- Microsoft.Windows.CppWinRT 3.0.260818.1
+- Microsoft.Windows.SDK.BuildTools 10.0.28000.2526
 - Visual Studio 2026 / v145
 - `/std:c++latest`
 - packaged deployment so Rectify12 can register the `windows.settingsApp` extension
