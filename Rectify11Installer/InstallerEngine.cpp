@@ -14,104 +14,108 @@ std::wstring IEngineWrapper::currprogress;
 std::mutex IEngineWrapper::progressMutex;
 std::mutex IEngineWrapper::logMutex;
 
-unsigned long IEngineWrapper::BeginMainAnim(LPVOID lpParam) {
+namespace {
+    void SetProgressText(const wchar_t* text) {
+        {
+            std::lock_guard<std::mutex> lock(IEngineWrapper::progressMutex);
+            IEngineWrapper::currprogress = text;
+        }
+        if (pwnd) PostMessageW(pwnd->GetHWND(), WM_UPDATEPROGRESS, 0, 0);
+    }
+
+    unsigned long FailInstall(const wchar_t* stage) {
+        InstallationLogger.WriteLine(L"Installation stopped because a required stage failed: " + std::wstring(stage));
+        SetProgressText(L"Installation failed. Review Installation.log before retrying.");
+        if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPFAILED, 0, 0);
+        return ERROR_INSTALL_FAILURE;
+    }
+}
+
+unsigned long IEngineWrapper::BeginMainAnim(LPVOID) {
     while (animate.load()) {
-        PostMessage(pwnd->GetHWND(), WM_UPDATEANIMATIONFRAME, NULL, NULL);
+        if (pwnd) PostMessageW(pwnd->GetHWND(), WM_UPDATEANIMATIONFRAME, 0, 0);
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
-    ExitThread(0);
+    return ERROR_SUCCESS;
 }
 
-unsigned long IEngineWrapper::BeginRestartAnim(LPVOID lpParam) {
+unsigned long IEngineWrapper::BeginRestartAnim(LPVOID) {
     while (animate.load()) {
-        PostMessage(pwnd->GetHWND(), WM_UPDATERESTARTANIMATIONFRAME, NULL, NULL);
+        if (pwnd) PostMessageW(pwnd->GetHWND(), WM_UPDATERESTARTANIMATIONFRAME, 0, 0);
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
-    ExitThread(0);
+    return ERROR_SUCCESS;
 }
 
-unsigned long IEngineWrapper::BeginInstall(LPVOID lpParam){
+unsigned long IEngineWrapper::BeginInstall(LPVOID) {
+    SetProgressText(L"Extracting files...");
+    if (!extractFiles()) return FailInstall(L"Extracting files");
 
-    {
-        std::lock_guard<std::mutex> lock(progressMutex);
-        currprogress = L"Extracting files...";
-    }
-    PostMessage(pwnd->GetHWND(), WM_UPDATEPROGRESS, NULL, NULL);
-    extractFiles();
+    SetProgressText(L"Copying files...");
+    if (!MoveFilesToTarget()) return FailInstall(L"Copying files");
 
-    {
-        std::lock_guard<std::mutex> lock(progressMutex);
-        currprogress = L"Copying files...";
-    }
-    PostMessage(pwnd->GetHWND(), WM_UPDATEPROGRESS, NULL, NULL);
-    MoveFilesToTarget();
+    SetProgressText(L"Installing fonts...");
+    if (!InstallFonts()) return FailInstall(L"Installing fonts");
 
-    {
-        std::lock_guard<std::mutex> lock(progressMutex);
-        currprogress = L"Installing fonts...";
-    }
-    PostMessage(pwnd->GetHWND(), WM_UPDATEPROGRESS, NULL, NULL);
-    InstallFonts();
+    SetProgressText(L"Installing programs...");
+    if (!InstallPrograms()) return FailInstall(L"Installing programs");
 
-    {
-        std::lock_guard<std::mutex> lock(progressMutex);
-        currprogress = L"Installing Programs...";
-    }
-    PostMessage(pwnd->GetHWND(), WM_UPDATEPROGRESS, NULL, NULL);
-    InstallPrograms();
+    SetProgressText(L"Installing tweaks...");
+    if (!RegisterWHMods()) return FailInstall(L"Installing tweaks");
 
-    {
-        std::lock_guard<std::mutex> lock(progressMutex);
-        currprogress = L"Installing Tweaks...";
-    }
-    PostMessage(pwnd->GetHWND(), WM_UPDATEPROGRESS, NULL, NULL);
-    RegisterWHMods();
+    SetProgressText(L"Finishing installation...");
+    if (!FinaliseInstall()) return FailInstall(L"Finalising installation");
 
-    {
-        std::lock_guard<std::mutex> lock(progressMutex);
-        currprogress = L"Finishing Installation...";
-    }
-    PostMessage(pwnd->GetHWND(), WM_UPDATEPROGRESS, NULL, NULL);
-    FinaliseInstall();
-     
-    PostMessage(pwnd->GetHWND(), WM_SETUPCOMPLETE, NULL, NULL);
-    ExitThread(0);
+    if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPCOMPLETE, 0, 0);
+    return ERROR_SUCCESS;
 }
 
-unsigned long IEngineWrapper::BeginUninstall(LPVOID lpParam) {
-
-    {
-        std::lock_guard<std::mutex> lock(progressMutex);
-        currprogress = L"Uninstalling...";
-    }
-    PostMessage(pwnd->GetHWND(), WM_UPDATEPROGRESS, NULL, NULL);
+unsigned long IEngineWrapper::BeginUninstall(LPVOID) {
+    SetProgressText(L"Uninstalling...");
     RemoveWHMods();
     RemoveSecureUX();
     FinaliseUninstall();
-    PostMessage(pwnd->GetHWND(), WM_SETUPCOMPLETE, NULL, NULL);
-    ExitThread(0);
+    if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPCOMPLETE, 0, 0);
+    return ERROR_SUCCESS;
 }
 
-unsigned long IEngineWrapper::BeginRestartCountdown(LPVOID lpParam) {
+unsigned long IEngineWrapper::BeginRestartCountdown(LPVOID) {
     int i = 30;
-    while (Ttime.load() >= 0 && animate.load()) {
-        PostMessage(pwnd->GetHWND(), WM_UPDATECOUNTDOWN, NULL, NULL);
+    Ttime.store(i);
+    while (Ttime.load() > 0 && animate.load()) {
+        if (pwnd) PostMessageW(pwnd->GetHWND(), WM_UPDATECOUNTDOWN, 0, 0);
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        i--;
-        Ttime.store(i);
+        Ttime.store(--i);
     }
+
+    if (!animate.load()) return ERROR_CANCELLED;
+    if (pwnd) PostMessageW(pwnd->GetHWND(), WM_UPDATECOUNTDOWN, 0, 0);
     SetupComplete();
-    PostMessage(pwnd->GetHWND(), WM_DESTROY, NULL, NULL);
-    ExitThread(0);
+    if (pwnd) PostMessageW(pwnd->GetHWND(), WM_DESTROY, 0, 0);
+    return ERROR_SUCCESS;
 }
 
 void IEngineWrapper::StartThread(unsigned long (*func)(LPVOID lpParam)) {
+    if (!func) return;
+
     animate.store(true);
-    DWORD myThreadID;
-    ienThread = CreateThread(0, 0, func, NULL, 0, &myThreadID);
+    if (ienThread) {
+        CloseHandle(ienThread);
+        ienThread = nullptr;
+    }
+
+    DWORD threadId = 0;
+    ienThread = CreateThread(nullptr, 0, func, nullptr, 0, &threadId);
+    if (!ienThread) {
+        InstallationLogger.WriteLine(L"Failed to create installer worker thread. Win32 error: " + std::to_wstring(GetLastError()));
+    }
 }
 
 void IEngineWrapper::StopThread() {
     animate.store(false);
+    if (!ienThread) return;
+
+    WaitForSingleObject(ienThread, 2000);
     CloseHandle(ienThread);
+    ienThread = nullptr;
 }
