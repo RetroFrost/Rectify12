@@ -76,6 +76,9 @@
   <ItemGroup>
     <ClInclude Include="Settings.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="settings.manifest" />
+  </ItemGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
