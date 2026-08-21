@@ -4,6 +4,7 @@
 #include <shellapi.h>
 
 #include <algorithm>
+#include <cwchar>
 #include <filesystem>
 #include <string>
 #include <string_view>
