@@ -1,0 +1,39 @@
+name: Build Rectify12 foundation
+
+on:
+  push:
+    branches:
+      - rectify12-foundation
+  workflow_dispatch:
+
+jobs:
+  build-x64:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Release x64
+        shell: pwsh
+        run: msbuild Rectify11Installer.sln /m /p:Configuration=Release /p:Platform=x64
+
+      - name: Collect binaries
+        if: success()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Get-ChildItem -Recurse -File -Include Rectify12Installer.exe,Rectify12ControlPanel.exe,Base.dll,Controls.dll,PageRes.dll | ForEach-Object {
+            Copy-Item $_.FullName -Destination artifacts -Force
+          }
+
+      - name: Upload binaries
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rectify12-foundation-x64
+          path: artifacts
+          if-no-files-found: error
