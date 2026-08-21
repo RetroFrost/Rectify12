@@ -19,10 +19,11 @@ using namespace Microsoft::UI::Xaml::Controls;
 
 namespace {
     std::filesystem::path DefaultBackupPath() {
-        wchar_t profile[MAX_PATH]{};
-        if (GetEnvironmentVariableW(L"USERPROFILE", profile, ARRAYSIZE(profile)) == 0) {
+        const std::wstring profile = Rectify12::SystemActions::EnvironmentValue(L"USERPROFILE");
+        if (profile.empty()) {
             return std::filesystem::path(L"Rectify12-settings.r12cfg");
         }
+
         const std::filesystem::path directory = std::filesystem::path(profile) / L"Documents" / L"Rectify12";
         std::error_code error;
         std::filesystem::create_directories(directory, error);
