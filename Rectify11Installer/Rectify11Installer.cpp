@@ -10,6 +10,7 @@
 #include "InitUninst.h"
 #include "Navigation.h"
 #include "InstallerEngine.h"
+#include "InstallationProcedure.h"
 #include "Logger.h"
 #include "MiscWindow.h"
 #include "EffectsEngine.h"
@@ -69,9 +70,20 @@ unsigned long dKey;
 std::map<std::wstring, bool> InstallFlags;
 
 void NavNext(Element* elem, Event* iev) {
-    if (iev->type == TouchButton::Click) {
-        Navigate();
+    if (iev->type != TouchButton::Click) return;
+
+    const bool isRestartPage =
+        (!uninstall && curr == RESTARTPAGE) ||
+        (uninstall && curr == RESTARTPAGEUNINST);
+    if (isRestartPage) {
+        // Prevent the countdown worker from issuing a second reboot request.
+        IEngineWrapper::animate.store(false);
+        IEngineWrapper::Ttime.store(0);
+        SetupComplete();
+        return;
     }
+
+    Navigate();
 }
 
 void NavBack(Element* elem, Event* iev) {
@@ -268,15 +280,17 @@ LRESULT CALLBACK SubclassWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
             break;
         }
         case WM_SETUPFAILED: {
+            IEngineWrapper::animate.store(false);
             TaskDialog(
                 hWnd,
                 nullptr,
                 L"Rectify12 setup",
-                L"Installation stopped",
+                L"Setup operation stopped",
                 L"A required setup step failed. Rectify12 will not continue to the success or restart screen. Review Installation.log, correct the reported problem, then retry setup.",
                 TDCBF_OK_BUTTON,
                 TD_ERROR_ICON,
                 nullptr);
+            PostMessageW(hWnd, WM_CLOSE, 0, 0);
             break;
         }
         case WM_MOVE: {
