@@ -16,6 +16,15 @@ namespace winrt::Rectify12Settings::implementation
         void OpenWindowsSettings_Click(
             Windows::Foundation::IInspectable const& sender,
             Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void ApplyEffects_Click(
+            Windows::Foundation::IInspectable const& sender,
+            Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void ApplyExplorerSettings_Click(
+            Windows::Foundation::IInspectable const& sender,
+            Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void ExplorerSafeMode_Click(
+            Windows::Foundation::IInspectable const& sender,
+            Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void RestartExplorer_Click(
             Windows::Foundation::IInspectable const& sender,
             Microsoft::UI::Xaml::RoutedEventArgs const& args);
@@ -45,6 +54,7 @@ namespace winrt::Rectify12Settings::implementation
         void SetPageText(std::wstring_view title, std::wstring_view description);
         void SetActionResult(bool success, std::wstring_view message);
         void UpdateActionVisibility(Rectify12::Settings::Page page);
+        void LoadEffectsIntoUi();
         void LoadExclusionsIntoEditor();
     };
 }
