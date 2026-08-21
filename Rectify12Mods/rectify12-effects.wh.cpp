@@ -5,7 +5,6 @@
 // @version         0.2.0
 // @author          RetroFrost
 // @github          https://github.com/RetroFrost/Rectify12
-// @include         explorer.exe
 // @include         control.exe
 // @include         Taskmgr.exe
 // @include         mmc.exe
