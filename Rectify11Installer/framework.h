@@ -16,11 +16,11 @@
 #include <wininet.h>
 
 // C++ RunTime Header Files
+#include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <codecvt>
+#include <ctime>
 #include <fstream>
-#include <locale>
 #include <mutex>
 #include <string>
 #include <thread>
