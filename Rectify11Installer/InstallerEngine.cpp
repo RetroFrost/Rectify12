@@ -8,6 +8,7 @@
 using namespace DirectUI;
 
 std::atomic_bool IEngineWrapper::animate = true;
+std::atomic_bool IEngineWrapper::operationRunning = false;
 std::atomic<int> IEngineWrapper::progressnum = 0;
 std::atomic<int> IEngineWrapper::Ttime = 30;
 std::wstring IEngineWrapper::currprogress;
@@ -30,6 +31,11 @@ namespace {
 
         const std::wstring progress = operationName + L" failed. Review Installation.log before retrying.";
         SetProgressText(progress.c_str());
+
+        // Clear this before posting the failure message. The UI failure handler closes
+        // the host after showing diagnostics, and that close must not be rejected by
+        // the active-operation guard.
+        IEngineWrapper::operationRunning.store(false);
         if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPFAILED, 0, 0);
         return ERROR_INSTALL_FAILURE;
     }
@@ -52,6 +58,12 @@ unsigned long IEngineWrapper::BeginRestartAnim(LPVOID) {
 }
 
 unsigned long IEngineWrapper::BeginInstall(LPVOID) {
+    bool expected = false;
+    if (!operationRunning.compare_exchange_strong(expected, true)) {
+        InstallationLogger.WriteLine(L"Installation start was rejected because another system operation is already running.");
+        return ERROR_BUSY;
+    }
+
     SetProgressText(L"Extracting files...");
     if (!extractFiles()) return FailOperation(L"Installation", L"Extracting files");
 
@@ -70,11 +82,18 @@ unsigned long IEngineWrapper::BeginInstall(LPVOID) {
     SetProgressText(L"Finishing installation...");
     if (!FinaliseInstall()) return FailOperation(L"Installation", L"Finalising installation");
 
+    operationRunning.store(false);
     if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPCOMPLETE, 0, 0);
     return ERROR_SUCCESS;
 }
 
 unsigned long IEngineWrapper::BeginUninstall(LPVOID) {
+    bool expected = false;
+    if (!operationRunning.compare_exchange_strong(expected, true)) {
+        InstallationLogger.WriteLine(L"Uninstallation start was rejected because another system operation is already running.");
+        return ERROR_BUSY;
+    }
+
     SetProgressText(L"Restoring system settings...");
     if (!RestoreDefenderSettingsIfNeeded()) {
         return FailOperation(L"Uninstallation", L"Restoring Microsoft Defender settings");
@@ -92,6 +111,7 @@ unsigned long IEngineWrapper::BeginUninstall(LPVOID) {
         return FailOperation(L"Uninstallation", L"Finalising uninstallation");
     }
 
+    operationRunning.store(false);
     if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPCOMPLETE, 0, 0);
     return ERROR_SUCCESS;
 }
