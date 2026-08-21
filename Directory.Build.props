@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Rectify11Installer'">
+    <!-- Temporary compatibility bridge while inherited source/project filenames are migrated. -->
+    <TargetName>Rectify12Installer</TargetName>
+    <RootNamespace>Rectify12Installer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup Condition="'$(MSBuildProjectName)' == 'Rectify11Installer'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+</Project>
