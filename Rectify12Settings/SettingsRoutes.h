@@ -10,6 +10,7 @@ namespace Rectify12::Settings {
         Explorer,
         Legacy,
         Compatibility,
+        Misc,
         Recovery,
         About,
     };
@@ -22,6 +23,7 @@ namespace Rectify12::Settings {
         if (uri.find(L"explorer") != std::wstring_view::npos) return Page::Explorer;
         if (uri.find(L"legacy") != std::wstring_view::npos) return Page::Legacy;
         if (uri.find(L"compatibility") != std::wstring_view::npos) return Page::Compatibility;
+        if (uri.find(L"misc") != std::wstring_view::npos) return Page::Misc;
         if (uri.find(L"recovery") != std::wstring_view::npos) return Page::Recovery;
         if (uri.find(L"about") != std::wstring_view::npos) return Page::About;
         return Page::Home;
