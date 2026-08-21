@@ -74,7 +74,7 @@ void NavNext(Element* elem, Event* iev) {
 
     const bool isRestartPage =
         (!uninstall && curr == RESTARTPAGE) ||
-        (uninstall && curr == RESTARTPAGEUNINST);
+        (uninstall && curr == (UNINSTALLRESTARTPAGE - MAXPAGE) + 1);
     if (isRestartPage) {
         // Prevent the countdown worker from issuing a second reboot request.
         IEngineWrapper::animate.store(false);
