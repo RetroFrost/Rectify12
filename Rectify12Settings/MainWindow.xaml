@@ -18,7 +18,7 @@
                     <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Home" /></muxc:NavigationViewItem.Icon>
                 </muxc:NavigationViewItem>
                 <muxc:NavigationViewItem Content="Appearance" Tag="appearance">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Personalize" /></muxc:NavigationViewItem.Icon>
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Setting" /></muxc:NavigationViewItem.Icon>
                 </muxc:NavigationViewItem>
                 <muxc:NavigationViewItem Content="Effects" Tag="effects">
                     <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="View" /></muxc:NavigationViewItem.Icon>
@@ -30,7 +30,7 @@
                     <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Repair" /></muxc:NavigationViewItem.Icon>
                 </muxc:NavigationViewItem>
                 <muxc:NavigationViewItem Content="Compatibility" Tag="compatibility">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Shield" /></muxc:NavigationViewItem.Icon>
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Admin" /></muxc:NavigationViewItem.Icon>
                 </muxc:NavigationViewItem>
                 <muxc:NavigationViewItem Content="Recovery" Tag="recovery">
                     <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Refresh" /></muxc:NavigationViewItem.Icon>
