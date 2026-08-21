@@ -7,6 +7,7 @@ namespace Rectify12::Settings {
     inline constexpr wchar_t EffectsKey[] = L"Software\\Rectify12\\Effects";
     inline constexpr wchar_t ValueEnabled[] = L"Enabled";
     inline constexpr wchar_t ValueReplaceGenericDark[] = L"ReplaceGenericDark";
+    inline constexpr wchar_t ValuePatchExplorer[] = L"PatchExplorer";
     inline constexpr wchar_t ValueBackdrop[] = L"Backdrop";
 
     enum class Backdrop : DWORD {
@@ -18,6 +19,7 @@ namespace Rectify12::Settings {
     struct EffectsPreferences {
         bool enabled = true;
         bool replaceGenericDark = true;
+        bool patchExplorer = true;
         Backdrop backdrop = Backdrop::Mica;
     };
 
@@ -39,6 +41,7 @@ namespace Rectify12::Settings {
 
         prefs.enabled = ReadDword(key, ValueEnabled, 1) != 0;
         prefs.replaceGenericDark = ReadDword(key, ValueReplaceGenericDark, 1) != 0;
+        prefs.patchExplorer = ReadDword(key, ValuePatchExplorer, 1) != 0;
 
         const DWORD backdrop = ReadDword(key, ValueBackdrop, static_cast<DWORD>(Backdrop::Mica));
         switch (backdrop) {
@@ -87,12 +90,12 @@ namespace Rectify12::Settings {
         const bool success =
             WriteDword(key, ValueEnabled, prefs.enabled ? 1 : 0) &&
             WriteDword(key, ValueReplaceGenericDark, prefs.replaceGenericDark ? 1 : 0) &&
+            WriteDword(key, ValuePatchExplorer, prefs.patchExplorer ? 1 : 0) &&
             WriteDword(key, ValueBackdrop, static_cast<DWORD>(prefs.backdrop));
 
         RegCloseKey(key);
 
         if (success) {
-            // Future Rectify12 effects hosts can listen for this and reload without a reboot.
             SendMessageTimeoutW(
                 HWND_BROADCAST,
                 WM_SETTINGCHANGE,
