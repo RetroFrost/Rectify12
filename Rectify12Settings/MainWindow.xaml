@@ -14,30 +14,14 @@
             SelectionChanged="NavView_SelectionChanged">
 
             <muxc:NavigationView.MenuItems>
-                <muxc:NavigationViewItem Content="Home" Tag="home">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Home" /></muxc:NavigationViewItem.Icon>
-                </muxc:NavigationViewItem>
-                <muxc:NavigationViewItem Content="Appearance" Tag="appearance">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Setting" /></muxc:NavigationViewItem.Icon>
-                </muxc:NavigationViewItem>
-                <muxc:NavigationViewItem Content="Effects" Tag="effects">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="View" /></muxc:NavigationViewItem.Icon>
-                </muxc:NavigationViewItem>
-                <muxc:NavigationViewItem Content="File Manager & Explorer" Tag="explorer">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Folder" /></muxc:NavigationViewItem.Icon>
-                </muxc:NavigationViewItem>
-                <muxc:NavigationViewItem Content="Windows settings" Tag="legacy">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Repair" /></muxc:NavigationViewItem.Icon>
-                </muxc:NavigationViewItem>
-                <muxc:NavigationViewItem Content="Compatibility" Tag="compatibility">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Admin" /></muxc:NavigationViewItem.Icon>
-                </muxc:NavigationViewItem>
-                <muxc:NavigationViewItem Content="Recovery" Tag="recovery">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Refresh" /></muxc:NavigationViewItem.Icon>
-                </muxc:NavigationViewItem>
-                <muxc:NavigationViewItem Content="About" Tag="about">
-                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Help" /></muxc:NavigationViewItem.Icon>
-                </muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Home" Tag="home"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Home" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Appearance" Tag="appearance"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Setting" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Effects" Tag="effects"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="View" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="File Manager &amp; Explorer" Tag="explorer"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Folder" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Windows settings" Tag="legacy"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Repair" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Compatibility" Tag="compatibility"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Admin" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Recovery" Tag="recovery"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Refresh" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="About" Tag="about"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Help" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
             </muxc:NavigationView.MenuItems>
 
             <ScrollViewer>
@@ -53,10 +37,38 @@
                             IsClosable="False"
                             Severity="Informational"
                             Title="Rectify12 development build"
-                            Message="Pages are being migrated from the temporary Control Panel. Unsupported Windows builds keep their original settings surfaces as fallbacks." />
+                            Message="Unsupported Windows builds keep their original Windows surfaces as fallbacks." />
+
+                        <InfoBar
+                            x:Name="ActionResult"
+                            IsOpen="False"
+                            IsClosable="True"
+                            Severity="Informational"
+                            Title="Rectify12" />
 
                         <StackPanel x:Name="PageContent" Margin="0,12,0,0" Spacing="10">
-                            <Button Content="Open Windows Settings" Click="OpenWindowsSettings_Click" HorizontalAlignment="Left" />
+                            <Button x:Name="OpenWindowsSettingsButton" Content="Open Windows Settings" Click="OpenWindowsSettings_Click" HorizontalAlignment="Left" />
+
+                            <StackPanel x:Name="ExplorerActions" Visibility="Collapsed" Spacing="8">
+                                <TextBlock Text="Explorer actions" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <Button Content="Restart Explorer" Click="RestartExplorer_Click" HorizontalAlignment="Left" />
+                            </StackPanel>
+
+                            <StackPanel x:Name="CompatibilityActions" Visibility="Collapsed" Spacing="8">
+                                <TextBlock Text="Per-app exclusions" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <TextBlock Text="Executable names here are excluded from Rectify12 visual hooks. Separate multiple names with semicolons." TextWrapping="Wrap" MaxWidth="680" Opacity="0.72" />
+                                <TextBox x:Name="ExclusionsEditor" PlaceholderText="example.exe; legacyapp.exe" Width="520" HorizontalAlignment="Left" />
+                                <Button Content="Save exclusions" Click="SaveExclusions_Click" HorizontalAlignment="Left" />
+                            </StackPanel>
+
+                            <StackPanel x:Name="RecoveryActions" Visibility="Collapsed" Spacing="8">
+                                <TextBlock Text="Recovery and maintenance" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <Button Content="Create restore snapshot" Click="CreateRestoreSnapshot_Click" HorizontalAlignment="Left" />
+                                <Button Content="Export Rectify12 settings" Click="ExportSettings_Click" HorizontalAlignment="Left" />
+                                <Button Content="Import Rectify12 settings" Click="ImportSettings_Click" HorizontalAlignment="Left" />
+                                <Button Content="Run Rectify Windows health check" Click="RunHealthCheck_Click" HorizontalAlignment="Left" />
+                                <TextBlock x:Name="HealthCheckOutput" TextWrapping="Wrap" MaxWidth="760" />
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </Grid>
