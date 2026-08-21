@@ -167,8 +167,11 @@ namespace {
     }
 
     BOOL WINAPI DestroyWindow_Hook(HWND hwnd) {
-        ForgetWindow(hwnd);
-        return DestroyWindow_Original(hwnd);
+        const BOOL destroyed = DestroyWindow_Original(hwnd);
+        if (destroyed) {
+            ForgetWindow(hwnd);
+        }
+        return destroyed;
     }
 
     BOOL CALLBACK ApplyExistingWindow(HWND hwnd, LPARAM) {
@@ -180,8 +183,9 @@ namespace {
 BOOL Wh_ModInit() {
     LoadPreferences();
     if (!Rectify12Runtime::ShouldApply()) {
-        Wh_Log(L"Rectify12 Effects disabled by runtime policy or compatibility exclusion");
-        return TRUE;
+        // Keep the hooks installed so a later runtime-policy change can apply to
+        // newly-created windows without requiring a full process/mod reload.
+        Wh_Log(L"Rectify12 Effects currently disabled by runtime policy or compatibility exclusion");
     }
 
     if (!Wh_SetFunctionHook(
