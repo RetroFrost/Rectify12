@@ -1,7 +1,7 @@
 // ==WindhawkMod==
 // @id              rectify12-effects
 // @name            Rectify12 Effects
-// @description     Applies Rectify12 Mica/Acrylic/Mica Alt backdrops to supported Microsoft desktop windows.
+// @description     Applies Rectify12 Acrylic/Mica/Mica Alt backdrops to supported Microsoft desktop windows.
 // @version         0.1.0
 // @author          RetroFrost
 // @github          https://github.com/RetroFrost/Rectify12
@@ -16,10 +16,10 @@
 /*
 # Rectify12 Effects
 
-Early Rectify12 effects host. It deliberately starts with a conservative set of
-Microsoft desktop processes and top-level captioned windows. It does **not**
-make arbitrary third-party windows transparent and it does not hook paint APIs
-in this first version.
+Early Rectify12 effects host. Acrylic is the Rectify12 default backdrop. The
+mod deliberately starts with a conservative set of Microsoft desktop processes
+and top-level captioned windows. It does **not** make arbitrary third-party
+windows transparent and it does not hook paint APIs in this first version.
 
 Preferences are read from:
 `HKCU\\Software\\Rectify12\\Effects`
@@ -51,7 +51,7 @@ namespace {
     struct Preferences {
         bool enabled = true;
         bool replaceGenericDark = true;
-        Backdrop backdrop = Backdrop::Mica;
+        Backdrop backdrop = Backdrop::Acrylic;
     };
 
     struct OriginalWindowState {
@@ -81,15 +81,18 @@ namespace {
             prefs.enabled = ReadDword(key, L"Enabled", 1) != 0;
             prefs.replaceGenericDark = ReadDword(key, L"ReplaceGenericDark", 1) != 0;
 
-            switch (ReadDword(key, L"Backdrop", static_cast<DWORD>(Backdrop::Mica))) {
+            switch (ReadDword(key, L"Backdrop", static_cast<DWORD>(Backdrop::Acrylic))) {
             case static_cast<DWORD>(Backdrop::Acrylic):
                 prefs.backdrop = Backdrop::Acrylic;
                 break;
             case static_cast<DWORD>(Backdrop::MicaAlt):
                 prefs.backdrop = Backdrop::MicaAlt;
                 break;
-            default:
+            case static_cast<DWORD>(Backdrop::Mica):
                 prefs.backdrop = Backdrop::Mica;
+                break;
+            default:
+                prefs.backdrop = Backdrop::Acrylic;
                 break;
             }
             RegCloseKey(key);
@@ -126,8 +129,9 @@ namespace {
         case Backdrop::MicaAlt:
             return DWMSBT_TABBEDWINDOW;
         case Backdrop::Mica:
-        default:
             return DWMSBT_MAINWINDOW;
+        default:
+            return DWMSBT_TRANSIENTWINDOW;
         }
     }
 
