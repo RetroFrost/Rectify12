@@ -2,6 +2,7 @@
 
 #include <windows.h>
 
+#include <algorithm>
 #include <cwchar>
 #include <string>
 #include <vector>
