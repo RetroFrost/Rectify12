@@ -4,15 +4,15 @@
 #define MY_HEADERLOGGER_H
 
 #include "framework.h"
-using namespace std;
+
 class Logger {
 private:
-	wfstream logfile;
+	std::wfstream logfile;
 	std::mutex mutex;
 public:
 	void StartLogger(const wchar_t* filename);
-	void WriteLine(wstring line);
-	void WriteLine(wstring line, int exitCode);
+	void WriteLine(const std::wstring& line);
+	void WriteLine(const std::wstring& line, int exitCode);
 	~Logger();
 };
 
