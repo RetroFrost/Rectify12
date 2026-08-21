@@ -129,16 +129,31 @@ namespace Rectify12::MiscActions {
     }
 
     inline bool DefenderBackupExists() noexcept {
-        DWORD version = 0;
-        DWORD size = sizeof(version);
-        return RegGetValueW(
-                   HKEY_LOCAL_MACHINE,
-                   L"SOFTWARE\\Rectify12\\DefenderBackup",
-                   L"Version",
-                   RRF_RT_REG_DWORD,
-                   nullptr,
-                   &version,
-                   &size) == ERROR_SUCCESS && version == 1;
+        constexpr wchar_t keyPath[] = L"SOFTWARE\\Rectify12\\DefenderBackup";
+        const wchar_t* requiredValues[] = {
+            L"Version",
+            L"ScanAvgCPULoadFactor",
+            L"EnableLowCpuPriority",
+            L"ScanOnlyIfIdleEnabled",
+            L"DisableCpuThrottleOnIdleScans"
+        };
+
+        for (const auto* name : requiredValues) {
+            DWORD value = 0;
+            DWORD size = sizeof(value);
+            if (RegGetValueW(
+                    HKEY_LOCAL_MACHINE,
+                    keyPath,
+                    name,
+                    RRF_RT_REG_DWORD,
+                    nullptr,
+                    &value,
+                    &size) != ERROR_SUCCESS) {
+                return false;
+            }
+            if (wcscmp(name, L"Version") == 0 && value != 1) return false;
+        }
+        return true;
     }
 
     inline Result OptimiseMicrosoftDefender() {
@@ -147,7 +162,11 @@ namespace Rectify12::MiscActions {
             L"-NoLogo -NoProfile -NonInteractive -Command \""
             L"$ErrorActionPreference='Stop'; "
             L"$k='HKLM:\\SOFTWARE\\Rectify12\\DefenderBackup'; "
-            L"if(-not (Test-Path -LiteralPath $k)){ "
+            L"$required=@('Version','ScanAvgCPULoadFactor','EnableLowCpuPriority','ScanOnlyIfIdleEnabled','DisableCpuThrottleOnIdleScans'); "
+            L"$validBackup=(Test-Path -LiteralPath $k); "
+            L"if($validBackup){ $existing=Get-ItemProperty -LiteralPath $k; foreach($n in $required){ if($existing.PSObject.Properties.Name -notcontains $n){ $validBackup=$false; break } }; if($validBackup -and $existing.Version -ne 1){ $validBackup=$false } }; "
+            L"if(-not $validBackup){ "
+                L"if(Test-Path -LiteralPath $k){ Remove-Item -LiteralPath $k -Recurse -Force }; "
                 L"$p=Get-MpPreference; "
                 L"if($null -eq $p.ScanAvgCPULoadFactor){ throw 'Defender scan preferences are unavailable.' }; "
                 L"New-Item -Path $k -Force | Out-Null; "
@@ -174,7 +193,7 @@ namespace Rectify12::MiscActions {
 
     inline Result RestoreMicrosoftDefenderScanSettings() {
         if (!DefenderBackupExists()) {
-            return { false, ERROR_NOT_FOUND, L"No Defender settings backup created by Rectify12 was found." };
+            return { false, ERROR_NOT_FOUND, L"No complete Defender settings backup created by Rectify12 was found." };
         }
 
         const auto powershell = SystemExecutable(L"WindowsPowerShell\\v1.0\\powershell.exe");
