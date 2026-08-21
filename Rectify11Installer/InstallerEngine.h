@@ -19,6 +19,7 @@ private:
 
 public:
 	static std::atomic_bool animate;
+	static std::atomic_bool operationRunning;
 	static std::atomic<int> progressnum;
 	static std::atomic<int> Ttime;
 	static std::wstring currprogress;
