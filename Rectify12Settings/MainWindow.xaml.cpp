@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MainWindow.xaml.h"
 #include "FeatureCatalog.h"
+#include "RuntimePolicy.h"
 #include "SystemActions.h"
 #if __has_include("MainWindow.g.cpp")
 #include "MainWindow.g.cpp"
@@ -118,7 +119,7 @@ namespace winrt::Rectify12Settings::implementation
             SetPageText(L"Compatibility", L"Per-process exclusions, build-specific fallbacks and protection from incompatible hooks.");
             break;
         case Page::Recovery:
-            SetPageText(L"Recovery", L"Restore snapshots, settings backup/import, health checks, module rollback and repair tools.");
+            SetPageText(L"Recovery", L"Global UI restore, restore snapshots, settings backup/import, health checks, module rollback and repair tools.");
             break;
         case Page::About:
             SetPageText(
@@ -166,6 +167,42 @@ namespace winrt::Rectify12Settings::implementation
         const auto result = Rectify12::SystemActions::SaveCompatibilityExclusions(exclusions);
         SetActionResult(result.success, result.message);
         if (result.success) LoadExclusionsIntoEditor();
+    }
+
+    void MainWindow::RestoreOriginalWindowsUi_Click(
+        Windows::Foundation::IInspectable const&,
+        RoutedEventArgs const&)
+    {
+        if (!Rectify12::RuntimePolicy::SetEnabled(false)) {
+            SetActionResult(false, L"Could not disable the Rectify12 runtime policy.");
+            return;
+        }
+
+        const auto explorer = Rectify12::SystemActions::RestartExplorer();
+        if (explorer.success) {
+            SetActionResult(true, L"Rectify12 hooks are disabled. Explorer was restarted; reopen other affected apps to restore their original Windows UI.");
+        }
+        else {
+            SetActionResult(true, L"Rectify12 hooks are disabled. Reopen affected apps; Explorer could not be restarted automatically.");
+        }
+    }
+
+    void MainWindow::EnableRectify12Ui_Click(
+        Windows::Foundation::IInspectable const&,
+        RoutedEventArgs const&)
+    {
+        if (!Rectify12::RuntimePolicy::SetEnabled(true)) {
+            SetActionResult(false, L"Could not enable the Rectify12 runtime policy.");
+            return;
+        }
+
+        const auto explorer = Rectify12::SystemActions::RestartExplorer();
+        if (explorer.success) {
+            SetActionResult(true, L"Rectify12 hooks are enabled. Explorer was restarted; reopen other supported apps to apply Rectify12.");
+        }
+        else {
+            SetActionResult(true, L"Rectify12 hooks are enabled. Reopen supported apps to apply Rectify12.");
+        }
     }
 
     void MainWindow::CreateRestoreSnapshot_Click(
