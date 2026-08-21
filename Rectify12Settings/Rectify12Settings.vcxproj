@@ -72,6 +72,7 @@
     <ClInclude Include="MainWindow.xaml.h"><DependentUpon>MainWindow.xaml</DependentUpon></ClInclude>
     <ClInclude Include="EffectsPolicy.h" />
     <ClInclude Include="FeatureCatalog.h" />
+    <ClInclude Include="MiscActions.h" />
     <ClInclude Include="RuntimePolicy.h" />
     <ClInclude Include="SettingsRoutes.h" />
     <ClInclude Include="SystemActions.h" />
@@ -86,6 +87,9 @@
   <ItemGroup>
     <Midl Include="MainWindow.idl"><SubType>Code</SubType><DependentUpon>MainWindow.xaml</DependentUpon></Midl>
   </ItemGroup>
-  <ItemGroup><None Include="Package.appxmanifest.template" /></ItemGroup>
+  <ItemGroup>
+    <Manifest Include="settings.manifest" />
+    <None Include="Package.appxmanifest.template" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
