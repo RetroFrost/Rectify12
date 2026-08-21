@@ -185,7 +185,7 @@ void SetBackdrop() {
     Rectify12::Effects::WindowEffectOptions options;
     options.immersiveDark = !GetUserAppMode();
     options.extendFrame = true;
-    options.backdrop = Rectify12::Effects::BackdropKind::MicaAlt;
+    options.backdrop = Rectify12::Effects::BackdropKind::Acrylic;
 
     const HRESULT effectResult = Rectify12::Effects::ApplyWindowEffects(pwnd->GetHWND(), options);
     if (FAILED(effectResult)) {
