@@ -14,3 +14,10 @@ namespace winrt::Rectify12Settings::implementation
         void ApplyActivationRoute();
     };
 }
+
+namespace winrt::Rectify12Settings::factory_implementation
+{
+    struct App : AppT<App, implementation::App>
+    {
+    };
+}
