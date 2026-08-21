@@ -91,19 +91,24 @@ unsigned long IEngineWrapper::BeginRestartCountdown(LPVOID) {
     if (!animate.load()) return ERROR_CANCELLED;
     if (pwnd) PostMessageW(pwnd->GetHWND(), WM_UPDATECOUNTDOWN, 0, 0);
     SetupComplete();
-    if (pwnd) PostMessageW(pwnd->GetHWND(), WM_DESTROY, 0, 0);
+    if (pwnd) PostMessageW(pwnd->GetHWND(), WM_CLOSE, 0, 0);
     return ERROR_SUCCESS;
 }
 
 void IEngineWrapper::StartThread(unsigned long (*func)(LPVOID lpParam)) {
     if (!func) return;
 
-    animate.store(true);
     if (ienThread) {
+        const DWORD existingState = WaitForSingleObject(ienThread, 0);
+        if (existingState == WAIT_TIMEOUT) {
+            InstallationLogger.WriteLine(L"Refusing to start a second installer worker while the previous worker is still running.");
+            return;
+        }
         CloseHandle(ienThread);
         ienThread = nullptr;
     }
 
+    animate.store(true);
     DWORD threadId = 0;
     ienThread = CreateThread(nullptr, 0, func, nullptr, 0, &threadId);
     if (!ienThread) {
