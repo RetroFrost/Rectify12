@@ -31,6 +31,15 @@ namespace winrt::Rectify12Settings::implementation
         void SaveExclusions_Click(
             Windows::Foundation::IInspectable const& sender,
             Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void EnableLongPaths_Click(
+            Windows::Foundation::IInspectable const& sender,
+            Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OptimiseDefender_Click(
+            Windows::Foundation::IInspectable const& sender,
+            Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void RestoreDefender_Click(
+            Windows::Foundation::IInspectable const& sender,
+            Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void RestoreOriginalWindowsUi_Click(
             Windows::Foundation::IInspectable const& sender,
             Microsoft::UI::Xaml::RoutedEventArgs const& args);
@@ -56,6 +65,7 @@ namespace winrt::Rectify12Settings::implementation
         void UpdateActionVisibility(Rectify12::Settings::Page page);
         void LoadEffectsIntoUi();
         void LoadExclusionsIntoEditor();
+        void LoadMiscIntoUi();
     };
 }
 
