@@ -1,0 +1,66 @@
+<Window
+    x:Class="Rectify12Settings.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    Title="Rectify12 Settings">
+
+    <Grid>
+        <muxc:NavigationView
+            x:Name="NavView"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            PaneDisplayMode="Left"
+            SelectionChanged="NavView_SelectionChanged">
+
+            <muxc:NavigationView.MenuItems>
+                <muxc:NavigationViewItem Content="Home" Tag="home">
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Home" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Appearance" Tag="appearance">
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Personalize" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Effects" Tag="effects">
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="View" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="File Manager & Explorer" Tag="explorer">
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Folder" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Windows settings" Tag="legacy">
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Repair" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Compatibility" Tag="compatibility">
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Shield" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Recovery" Tag="recovery">
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Refresh" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="About" Tag="about">
+                    <muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Help" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+            </muxc:NavigationView.MenuItems>
+
+            <ScrollViewer>
+                <Grid Padding="36,28,36,40" MaxWidth="1000" HorizontalAlignment="Left">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="PageTitle" Text="Rectify12" Style="{ThemeResource TitleTextBlockStyle}" />
+                        <TextBlock x:Name="PageDescription" Text="Windows visual consistency, Explorer, effects and recovery." TextWrapping="Wrap" Opacity="0.72" MaxWidth="760" />
+
+                        <InfoBar
+                            x:Name="DevelopmentInfo"
+                            Margin="0,12,0,4"
+                            IsOpen="True"
+                            IsClosable="False"
+                            Severity="Informational"
+                            Title="Rectify12 development build"
+                            Message="Pages are being migrated from the temporary Control Panel. Unsupported Windows builds keep their original settings surfaces as fallbacks." />
+
+                        <StackPanel x:Name="PageContent" Margin="0,12,0,0" Spacing="10">
+                            <Button Content="Open Windows Settings" Click="OpenWindowsSettings_Click" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </muxc:NavigationView>
+    </Grid>
+</Window>
