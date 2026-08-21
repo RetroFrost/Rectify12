@@ -63,6 +63,8 @@
 
                             <StackPanel x:Name="RecoveryActions" Visibility="Collapsed" Spacing="8">
                                 <TextBlock Text="Recovery and maintenance" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <Button Content="Restore original Windows UI" Click="RestoreOriginalWindowsUi_Click" HorizontalAlignment="Left" />
+                                <Button Content="Re-enable Rectify12 UI" Click="EnableRectify12Ui_Click" HorizontalAlignment="Left" />
                                 <Button Content="Create restore snapshot" Click="CreateRestoreSnapshot_Click" HorizontalAlignment="Left" />
                                 <Button Content="Export Rectify12 settings" Click="ExportSettings_Click" HorizontalAlignment="Left" />
                                 <Button Content="Import Rectify12 settings" Click="ImportSettings_Click" HorizontalAlignment="Left" />
