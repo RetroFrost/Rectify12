@@ -1,22 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32"><Configuration>Debug</Configuration><Platform>Win32</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32"><Configuration>Release</Configuration><Platform>Win32</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
@@ -27,264 +15,67 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-    <SupportLTL>true</SupportLTL>
-    <CleanImport>true</CleanImport>
-    <WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion>
-    <DisableAdvancedSupport>true</DisableAdvancedSupport>
+    <ConfigurationType>Application</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet><SupportLTL>true</SupportLTL><CleanImport>true</CleanImport><WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion><DisableAdvancedSupport>true</DisableAdvancedSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-    <SupportLTL>true</SupportLTL>
-    <CleanImport>true</CleanImport>
-    <WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion>
-    <DisableAdvancedSupport>true</DisableAdvancedSupport>
+    <ConfigurationType>Application</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v145</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet><SupportLTL>true</SupportLTL><CleanImport>true</CleanImport><WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion><DisableAdvancedSupport>true</DisableAdvancedSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-    <SupportLTL>true</SupportLTL>
-    <CleanImport>true</CleanImport>
-    <WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion>
-    <DisableAdvancedSupport>true</DisableAdvancedSupport>
+    <ConfigurationType>Application</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet><SupportLTL>true</SupportLTL><CleanImport>true</CleanImport><WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion><DisableAdvancedSupport>true</DisableAdvancedSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-    <SupportLTL>true</SupportLTL>
-    <CleanImport>true</CleanImport>
-    <WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion>
-    <DisableAdvancedSupport>true</DisableAdvancedSupport>
+    <ConfigurationType>Application</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v145</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet><SupportLTL>true</SupportLTL><CleanImport>true</CleanImport><WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion><DisableAdvancedSupport>true</DisableAdvancedSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"><LinkIncremental>true</LinkIncremental></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"><LinkIncremental>false</LinkIncremental></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><LinkIncremental>true</LinkIncremental><CopyLocalDeploymentContent>true</CopyLocalDeploymentContent></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><LinkIncremental>false</LinkIncremental><CopyLocalDeploymentContent>true</CopyLocalDeploymentContent></PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dui70.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
+    <ClCompile><WarningLevel>Level3</WarningLevel><SDLCheck>true</SDLCheck><PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions><ConformanceMode>true</ConformanceMode><LanguageStandard>stdcpplatest</LanguageStandard><AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions></ClCompile>
+    <Link><SubSystem>Windows</SubSystem><GenerateDebugInformation>true</GenerateDebugInformation><AdditionalDependencies>dui70.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
+    <ClCompile><WarningLevel>Level3</WarningLevel><FunctionLevelLinking>true</FunctionLevelLinking><IntrinsicFunctions>true</IntrinsicFunctions><SDLCheck>true</SDLCheck><PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions><ConformanceMode>true</ConformanceMode><LanguageStandard>stdcpplatest</LanguageStandard><AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions></ClCompile>
+    <Link><SubSystem>Windows</SubSystem><EnableCOMDATFolding>true</EnableCOMDATFolding><OptimizeReferences>true</OptimizeReferences><GenerateDebugInformation>true</GenerateDebugInformation></Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <Optimization>Full</Optimization>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dui70.lib;Dwmapi.lib;Comctl32.lib;Wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"</AdditionalManifestDependencies>
-    </Link>
+    <ClCompile><WarningLevel>Level3</WarningLevel><SDLCheck>true</SDLCheck><PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions><ConformanceMode>true</ConformanceMode><Optimization>Full</Optimization><BasicRuntimeChecks>Default</BasicRuntimeChecks><LanguageStandard>stdcpplatest</LanguageStandard><AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions></ClCompile>
+    <Link><SubSystem>Windows</SubSystem><GenerateDebugInformation>true</GenerateDebugInformation><AdditionalDependencies>dui70.lib;Dwmapi.lib;Comctl32.lib;Wininet.lib;%(AdditionalDependencies)</AdditionalDependencies><UACExecutionLevel>RequireAdministrator</UACExecutionLevel><AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"</AdditionalManifestDependencies></Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dui70.lib;Dwmapi.lib;Comctl32.lib;Wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"</AdditionalManifestDependencies>
-    </Link>
+    <ClCompile><WarningLevel>Level3</WarningLevel><FunctionLevelLinking>true</FunctionLevelLinking><IntrinsicFunctions>true</IntrinsicFunctions><SDLCheck>true</SDLCheck><PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions><ConformanceMode>true</ConformanceMode><LanguageStandard>stdcpplatest</LanguageStandard><AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions></ClCompile>
+    <Link><SubSystem>Windows</SubSystem><EnableCOMDATFolding>true</EnableCOMDATFolding><OptimizeReferences>true</OptimizeReferences><GenerateDebugInformation>true</GenerateDebugInformation><AdditionalDependencies>dui70.lib;Dwmapi.lib;Comctl32.lib;Wininet.lib;%(AdditionalDependencies)</AdditionalDependencies><UACExecutionLevel>RequireAdministrator</UACExecutionLevel><AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"</AdditionalManifestDependencies></Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DirectUI\accessibility.h" />
-    <ClInclude Include="DirectUI\AutoLock.h" />
-    <ClInclude Include="DirectUI\AutoThread.h" />
-    <ClInclude Include="DirectUI\AutoVariant.h" />
-    <ClInclude Include="DirectUI\base.h" />
-    <ClInclude Include="DirectUI\BorderLayout.h" />
-    <ClInclude Include="DirectUI\Button.h" />
-    <ClInclude Include="DirectUI\CallstackTracker.h" />
-    <ClInclude Include="DirectUI\CClassFactory.h" />
-    <ClInclude Include="DirectUI\CheckBoxGlyph.h" />
-    <ClInclude Include="DirectUI\DirectUI.h" />
-    <ClInclude Include="DirectUI\Element.h" />
-    <ClInclude Include="DirectUI\ElementWithHWND.h" />
-    <ClInclude Include="DirectUI\EventManager.h" />
-    <ClInclude Include="DirectUI\FontCache.h" />
-    <ClInclude Include="DirectUI\FontCheckOut.h" />
-    <ClInclude Include="DirectUI\host.h" />
-    <ClInclude Include="DirectUI\HWNDElement.h" />
-    <ClInclude Include="DirectUI\HWNDHost.h" />
-    <ClInclude Include="DirectUI\Interfaces.h" />
-    <ClInclude Include="DirectUI\InvokeHelper.h" />
-    <ClInclude Include="DirectUI\layout.h" />
-    <ClInclude Include="DirectUI\misc.h" />
-    <ClInclude Include="DirectUI\NativeHWNDHost.h" />
-    <ClInclude Include="DirectUI\parser.h" />
-    <ClInclude Include="DirectUI\Primitives.h" />
-    <ClInclude Include="DirectUI\Progress.h" />
-    <ClInclude Include="DirectUI\provider.h" />
-    <ClInclude Include="DirectUI\RangeValue.h" />
-    <ClInclude Include="DirectUI\RefPointElement.h" />
-    <ClInclude Include="DirectUI\RichText.h" />
-    <ClInclude Include="DirectUI\TouchButton.h" />
-    <ClInclude Include="DirectUI\TouchCheckBox.h" />
-    <ClInclude Include="DirectUI\types.h" />
-    <ClInclude Include="DirectUI\Value.h" />
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="InitUninst.h" />
-    <ClInclude Include="InstallationProcedure.h" />
-    <ClInclude Include="Initr11.h" />
-    <ClInclude Include="InstallerEngine.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="MiscWindow.h" />
-    <ClInclude Include="Navigation.h" />
-    <ClInclude Include="Rectify11Installer.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="UninstallationProcedure.h" />
+    <ClInclude Include="DirectUI\accessibility.h" /><ClInclude Include="DirectUI\AutoLock.h" /><ClInclude Include="DirectUI\AutoThread.h" /><ClInclude Include="DirectUI\AutoVariant.h" /><ClInclude Include="DirectUI\base.h" /><ClInclude Include="DirectUI\BorderLayout.h" /><ClInclude Include="DirectUI\Button.h" /><ClInclude Include="DirectUI\CallstackTracker.h" /><ClInclude Include="DirectUI\CClassFactory.h" /><ClInclude Include="DirectUI\CheckBoxGlyph.h" /><ClInclude Include="DirectUI\DirectUI.h" /><ClInclude Include="DirectUI\Element.h" /><ClInclude Include="DirectUI\ElementWithHWND.h" /><ClInclude Include="DirectUI\EventManager.h" /><ClInclude Include="DirectUI\FontCache.h" /><ClInclude Include="DirectUI\FontCheckOut.h" /><ClInclude Include="DirectUI\host.h" /><ClInclude Include="DirectUI\HWNDElement.h" /><ClInclude Include="DirectUI\HWNDHost.h" /><ClInclude Include="DirectUI\Interfaces.h" /><ClInclude Include="DirectUI\InvokeHelper.h" /><ClInclude Include="DirectUI\layout.h" /><ClInclude Include="DirectUI\misc.h" /><ClInclude Include="DirectUI\NativeHWNDHost.h" /><ClInclude Include="DirectUI\parser.h" /><ClInclude Include="DirectUI\Primitives.h" /><ClInclude Include="DirectUI\Progress.h" /><ClInclude Include="DirectUI\provider.h" /><ClInclude Include="DirectUI\RangeValue.h" /><ClInclude Include="DirectUI\RefPointElement.h" /><ClInclude Include="DirectUI\RichText.h" /><ClInclude Include="DirectUI\TouchButton.h" /><ClInclude Include="DirectUI\TouchCheckBox.h" /><ClInclude Include="DirectUI\types.h" /><ClInclude Include="DirectUI\Value.h" /><ClInclude Include="framework.h" /><ClInclude Include="InitUninst.h" /><ClInclude Include="InstallationProcedure.h" /><ClInclude Include="Initr11.h" /><ClInclude Include="InstallerEngine.h" /><ClInclude Include="Logger.h" /><ClInclude Include="MiscWindow.h" /><ClInclude Include="Navigation.h" /><ClInclude Include="Rectify11Installer.h" /><ClInclude Include="Resource.h" /><ClInclude Include="targetver.h" /><ClInclude Include="UninstallationProcedure.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="InitUninst.cpp" />
-    <ClCompile Include="InstallationProcedure.cpp" />
-    <ClCompile Include="Initr11.cpp" />
-    <ClCompile Include="InstallerEngine.cpp" />
-    <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="MiscWindow.cpp" />
-    <ClCompile Include="Navigation.cpp" />
-    <ClCompile Include="Rectify11Installer.cpp" />
-    <ClCompile Include="UninstallationProcedure.cpp" />
+    <ClCompile Include="InitUninst.cpp" /><ClCompile Include="InstallationProcedure.cpp" /><ClCompile Include="Initr11.cpp" /><ClCompile Include="InstallerEngine.cpp" /><ClCompile Include="Logger.cpp" /><ClCompile Include="MiscWindow.cpp" /><ClCompile Include="Navigation.cpp" /><ClCompile Include="Rectify11Installer.cpp" /><ClCompile Include="UninstallationProcedure.cpp" />
   </ItemGroup>
+  <ItemGroup><ResourceCompile Include="Rectify11Installer.rc" /></ItemGroup>
+  <ItemGroup><Image Include="Rectify11Installer.ico" /><Image Include="small.ico" /></ItemGroup>
+  <ItemGroup><Xml Include="coffee.xml" /><Xml Include="credits.xml" /><Xml Include="Pages\1.xml" /><Xml Include="Pages\10.xml" /><Xml Include="Pages\2.xml" /><Xml Include="Pages\3.xml" /><Xml Include="Pages\4.xml" /><Xml Include="Pages\5.xml" /><Xml Include="Pages\6.xml" /><Xml Include="Pages\7.xml" /><Xml Include="Pages\8.xml" /><Xml Include="Pages\9.xml" /><Xml Include="uifile.xml" /></ItemGroup>
+  <ItemGroup><Manifest Include="settings.manifest" /></ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Rectify11Installer.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Rectify11Installer.ico" />
-    <Image Include="small.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="coffee.xml" />
-    <Xml Include="credits.xml" />
-    <Xml Include="Pages\1.xml" />
-    <Xml Include="Pages\10.xml" />
-    <Xml Include="Pages\2.xml" />
-    <Xml Include="Pages\3.xml" />
-    <Xml Include="Pages\4.xml" />
-    <Xml Include="Pages\5.xml" />
-    <Xml Include="Pages\6.xml" />
-    <Xml Include="Pages\7.xml" />
-    <Xml Include="Pages\8.xml" />
-    <Xml Include="Pages\9.xml" />
-    <Xml Include="uifile.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Manifest Include="settings.manifest" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Base.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="Controls.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="PageRes.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="Rectify11\7z.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="Rectify11\7z.exe">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="Rectify11\Files.7z">
+    <None Include="Base.dll"><DeploymentContent>true</DeploymentContent></None>
+    <None Include="Controls.dll"><DeploymentContent>true</DeploymentContent></None>
+    <None Include="PageRes.dll"><DeploymentContent>true</DeploymentContent></None>
+    <None Include="Rectify11\7z.dll"><DeploymentContent>true</DeploymentContent></None>
+    <None Include="Rectify11\7z.exe"><DeploymentContent>true</DeploymentContent></None>
+    <None Include="Rectify11\Files.7z" Condition="Exists('Rectify11\Files.7z')">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Font Include="segoe_r11.ttf">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
-    </Font>
-  </ItemGroup>
+  <ItemGroup><Font Include="segoe_r11.ttf"><DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent><DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent></Font></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
