@@ -21,6 +21,7 @@ namespace {
     HWND gReplaceGenericDark = nullptr;
     HWND gBackdrop = nullptr;
     HFONT gUiFont = nullptr;
+    HFONT gTitleFont = nullptr;
 
     bool IsDarkModeEnabled() {
         DWORD value = 0;
@@ -54,6 +55,11 @@ namespace {
         }
     }
 
+    BOOL CALLBACK ApplyChildTheme(HWND hwnd, LPARAM) {
+        ApplyControlTheme(hwnd);
+        return TRUE;
+    }
+
     void SetCheck(HWND hwnd, bool checked) {
         SendMessageW(hwnd, BM_SETCHECK, checked ? BST_CHECKED : BST_UNCHECKED, 0);
     }
@@ -77,7 +83,11 @@ namespace {
 
     Rectify12::Settings::EffectsPreferences ReadPreferencesFromUi() {
         using namespace Rectify12::Settings;
-        EffectsPreferences prefs;
+
+        // Preserve settings which this compact Control Panel page doesn't expose.
+        // Constructing a fresh EffectsPreferences here would silently reset
+        // PatchExplorer/ExplorerSafeMode every time Apply is pressed.
+        EffectsPreferences prefs = LoadEffectsPreferences();
         prefs.enabled = GetCheck(gEffectsEnabled);
         prefs.replaceGenericDark = GetCheck(gReplaceGenericDark);
 
@@ -165,8 +175,8 @@ namespace {
             GetObjectW(gUiFont, sizeof(titleFont), &titleFont);
             titleFont.lfHeight = -28;
             titleFont.lfWeight = FW_SEMIBOLD;
-            HFONT largeFont = CreateFontIndirectW(&titleFont);
-            if (largeFont) SendMessageW(title, WM_SETFONT, reinterpret_cast<WPARAM>(largeFont), TRUE);
+            gTitleFont = CreateFontIndirectW(&titleFont);
+            if (gTitleFont) SendMessageW(title, WM_SETFONT, reinterpret_cast<WPARAM>(gTitleFont), TRUE);
         }
 
         AddStatic(
@@ -215,6 +225,8 @@ namespace {
 
         case WM_SETTINGCHANGE:
             ApplyBackdrop(hwnd);
+            EnumChildWindows(hwnd, ApplyChildTheme, 0);
+            InvalidateRect(hwnd, nullptr, TRUE);
             return 0;
 
         case WM_COMMAND:
@@ -246,6 +258,10 @@ namespace {
             return 1;
 
         case WM_DESTROY:
+            if (gTitleFont) {
+                DeleteObject(gTitleFont);
+                gTitleFont = nullptr;
+            }
             if (gUiFont) {
                 DeleteObject(gUiFont);
                 gUiFont = nullptr;
@@ -299,9 +315,14 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int showCommand) {
     UpdateWindow(hwnd);
 
     MSG message{};
-    while (GetMessageW(&message, nullptr, 0, 0) > 0) {
+    int getMessageResult = 0;
+    while ((getMessageResult = static_cast<int>(GetMessageW(&message, nullptr, 0, 0))) > 0) {
         TranslateMessage(&message);
         DispatchMessageW(&message);
+    }
+
+    if (getMessageResult == -1) {
+        return static_cast<int>(GetLastError());
     }
 
     return static_cast<int>(message.wParam);
