@@ -49,8 +49,24 @@
                         <StackPanel x:Name="PageContent" Margin="0,12,0,0" Spacing="10">
                             <Button x:Name="OpenWindowsSettingsButton" Content="Open Windows Settings" Click="OpenWindowsSettings_Click" HorizontalAlignment="Left" />
 
+                            <StackPanel x:Name="EffectsActions" Visibility="Collapsed" Spacing="10">
+                                <TextBlock Text="Backdrop and dark-surface policy" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <ToggleSwitch x:Name="EffectsEnabledToggle" Header="Enable Rectify12 effects" />
+                                <ToggleSwitch x:Name="ReplaceGenericDarkToggle" Header="Replace compatible generic dark surfaces" />
+                                <TextBlock Text="Preferred backdrop" />
+                                <ComboBox x:Name="BackdropComboBox" Width="260" HorizontalAlignment="Left">
+                                    <ComboBoxItem Content="Acrylic" />
+                                    <ComboBoxItem Content="Mica" />
+                                    <ComboBoxItem Content="Mica Alt" />
+                                </ComboBox>
+                                <Button Content="Apply effects" Click="ApplyEffects_Click" HorizontalAlignment="Left" />
+                            </StackPanel>
+
                             <StackPanel x:Name="ExplorerActions" Visibility="Collapsed" Spacing="8">
                                 <TextBlock Text="Explorer actions" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <ToggleSwitch x:Name="ExplorerPatchToggle" Header="Enable Rectify12 Explorer patch" />
+                                <Button Content="Apply Explorer setting" Click="ApplyExplorerSettings_Click" HorizontalAlignment="Left" />
+                                <Button Content="Explorer safe mode" Click="ExplorerSafeMode_Click" HorizontalAlignment="Left" />
                                 <Button Content="Restart Explorer" Click="RestartExplorer_Click" HorizontalAlignment="Left" />
                             </StackPanel>
 
