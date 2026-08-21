@@ -110,6 +110,23 @@ namespace {
         g_originalStates.emplace(hwnd, state);
     }
 
+    void RestoreRememberedBackdrop(HWND hwnd) {
+        OriginalWindowState state;
+        bool found = false;
+        {
+            std::lock_guard lock(g_stateMutex);
+            const auto iterator = g_originalStates.find(hwnd);
+            if (iterator != g_originalStates.end()) {
+                state = iterator->second;
+                found = true;
+            }
+        }
+
+        if (!found) return;
+        const auto backdrop = state.hasBackdrop ? state.backdrop : DWMSBT_AUTO;
+        DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
+    }
+
     void ApplyExplorerPatch(HWND hwnd) {
         if (!Rectify12Runtime::ShouldApply()) return;
         if (!g_preferences.effectsEnabled || !g_preferences.patchExplorer || !IsExplorerFrame(hwnd)) return;
@@ -121,6 +138,11 @@ namespace {
         if (dark && g_preferences.replaceGenericDark) {
             const auto backdrop = PreferredBackdrop();
             DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
+        }
+        else {
+            // Do not leave a Rectify12 backdrop stuck on a window after the
+            // user switches to light mode or disables generic-dark replacement.
+            RestoreRememberedBackdrop(hwnd);
         }
 
         SetWindowTheme(hwnd, dark ? L"DarkMode_Explorer" : L"Explorer", nullptr);
@@ -148,7 +170,9 @@ namespace {
             if (state.hasDarkMode) {
                 DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &state.darkMode, sizeof(state.darkMode));
             }
-            SetWindowTheme(hwnd, L"Explorer", nullptr);
+            // Remove our explicit theme override instead of forcing Explorer,
+            // allowing Windows to choose the current native theme again.
+            SetWindowTheme(hwnd, nullptr, nullptr);
             RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
         }
     }
@@ -170,8 +194,11 @@ namespace {
     }
 
     BOOL WINAPI DestroyWindow_Hook(HWND hwnd) {
-        ForgetWindow(hwnd);
-        return DestroyWindow_Original(hwnd);
+        const BOOL destroyed = DestroyWindow_Original(hwnd);
+        if (destroyed) {
+            ForgetWindow(hwnd);
+        }
+        return destroyed;
     }
 
     BOOL CALLBACK ApplyExistingExplorerWindow(HWND hwnd, LPARAM) {
@@ -183,8 +210,9 @@ namespace {
 BOOL Wh_ModInit() {
     LoadPreferences();
     if (!Rectify12Runtime::ShouldApply()) {
-        Wh_Log(L"Rectify12 Explorer Patch disabled by runtime policy or compatibility exclusion");
-        return TRUE;
+        // Keep the hooks installed so the process can honour a later policy
+        // change for newly-created Explorer windows without a mod reload.
+        Wh_Log(L"Rectify12 Explorer Patch currently disabled by runtime policy or compatibility exclusion");
     }
     if (!Wh_SetFunctionHook(
             reinterpret_cast<void*>(CreateWindowExW),
