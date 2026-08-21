@@ -2,6 +2,7 @@
 #include "MainWindow.xaml.h"
 #include "EffectsPolicy.h"
 #include "FeatureCatalog.h"
+#include "MiscActions.h"
 #include "RuntimePolicy.h"
 #include "SystemActions.h"
 #if __has_include("MainWindow.g.cpp")
@@ -93,17 +94,30 @@ namespace winrt::Rectify12Settings::implementation
         ExclusionsEditor().Text(hstring{ joined });
     }
 
+    void MainWindow::LoadMiscIntoUi()
+    {
+        std::wstring status = Rectify12::MiscActions::LongPathsEnabled()
+            ? L"Win32 long-path policy: enabled."
+            : L"Win32 long-path policy: not enabled.";
+        status += Rectify12::MiscActions::DefenderBackupExists()
+            ? L"\nDefender rollback snapshot: available."
+            : L"\nDefender rollback snapshot: not created.";
+        MiscStatus().Text(hstring{ status });
+    }
+
     void MainWindow::UpdateActionVisibility(Rectify12::Settings::Page page)
     {
         using Rectify12::Settings::Page;
         EffectsActions().Visibility(page == Page::Effects ? Visibility::Visible : Visibility::Collapsed);
         ExplorerActions().Visibility(page == Page::Explorer ? Visibility::Visible : Visibility::Collapsed);
         CompatibilityActions().Visibility(page == Page::Compatibility ? Visibility::Visible : Visibility::Collapsed);
+        MiscActions().Visibility(page == Page::Misc ? Visibility::Visible : Visibility::Collapsed);
         RecoveryActions().Visibility(page == Page::Recovery ? Visibility::Visible : Visibility::Collapsed);
         OpenWindowsSettingsButton().Visibility((page == Page::Home || page == Page::Legacy) ? Visibility::Visible : Visibility::Collapsed);
 
         if (page == Page::Effects || page == Page::Explorer) LoadEffectsIntoUi();
         if (page == Page::Compatibility) LoadExclusionsIntoEditor();
+        if (page == Page::Misc) LoadMiscIntoUi();
     }
 
     void MainWindow::NavigateTo(Rectify12::Settings::Page page)
@@ -128,6 +142,9 @@ namespace winrt::Rectify12Settings::implementation
             break;
         case Page::Compatibility:
             SetPageText(L"Compatibility", L"Per-process exclusions, build-specific fallbacks and protection from incompatible hooks.");
+            break;
+        case Page::Misc:
+            SetPageText(L"Misc", L"System-wide compatibility and performance tweaks that do not belong to the visual or Explorer modules.");
             break;
         case Page::Recovery:
             SetPageText(L"Recovery", L"Global UI restore, restore snapshots, settings backup/import, health checks, module rollback and repair tools.");
@@ -213,6 +230,27 @@ namespace winrt::Rectify12Settings::implementation
         const auto result = Rectify12::SystemActions::SaveCompatibilityExclusions(exclusions);
         SetActionResult(result.success, result.message);
         if (result.success) LoadExclusionsIntoEditor();
+    }
+
+    void MainWindow::EnableLongPaths_Click(Windows::Foundation::IInspectable const&, RoutedEventArgs const&)
+    {
+        const auto result = Rectify12::MiscActions::EnableLongPaths();
+        SetActionResult(result.success, result.message);
+        LoadMiscIntoUi();
+    }
+
+    void MainWindow::OptimiseDefender_Click(Windows::Foundation::IInspectable const&, RoutedEventArgs const&)
+    {
+        const auto result = Rectify12::MiscActions::OptimiseMicrosoftDefender();
+        SetActionResult(result.success, result.message);
+        LoadMiscIntoUi();
+    }
+
+    void MainWindow::RestoreDefender_Click(Windows::Foundation::IInspectable const&, RoutedEventArgs const&)
+    {
+        const auto result = Rectify12::MiscActions::RestoreMicrosoftDefenderScanSettings();
+        SetActionResult(result.success, result.message);
+        LoadMiscIntoUi();
     }
 
     void MainWindow::RestoreOriginalWindowsUi_Click(Windows::Foundation::IInspectable const&, RoutedEventArgs const&)
