@@ -5,6 +5,7 @@
 #include <restrictederrorinfo.h>
 #include <hstring.h>
 
+#include <winrt/Windows.ApplicationModel.Activation.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.System.h>
 #include <winrt/Microsoft.UI.Xaml.h>
