@@ -5,24 +5,22 @@
 #define WM_UPDATECOUNTDOWN WM_USER+4
 #define WM_SETUPCOMPLETE WM_USER+5
 
-
 #ifndef MY_HEADER_H
 #define MY_HEADER_H
 
 #include "framework.h"
-using namespace std;
 
 #endif
 
 class IEngineWrapper {
 private:
-	HANDLE ienThread;
+	HANDLE ienThread{};
 
 public:
-	static atomic_bool animate;
-	static atomic<int> progressnum;
-	static atomic<int> Ttime;
-	static wstring currprogress;
+	static std::atomic_bool animate;
+	static std::atomic<int> progressnum;
+	static std::atomic<int> Ttime;
+	static std::wstring currprogress;
 	static std::mutex progressMutex;
 	static std::mutex logMutex;
 	void StartThread(unsigned long (*func)(LPVOID lpParam));
