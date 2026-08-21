@@ -4,7 +4,7 @@ Rectify12 treats Windows Settings as the primary configuration surface. The lega
 
 ## UI baseline
 
-All Rectify12-owned user interfaces target C++/WinRT + WinUI 3 on the Windows App SDK. The first target is Windows App SDK 2.3.1 with the Visual Studio 2026 v145 toolset and `/std:c++latest`.
+All Rectify12-owned user interfaces target C++/WinRT + WinUI 3 on the Windows App SDK. The current baseline is Windows App SDK 2.4.0, Microsoft.Windows.CppWinRT 3.0.260818.1, the Visual Studio 2026 v145 toolset, and `/std:c++latest`.
 
 Owned UI includes:
 
