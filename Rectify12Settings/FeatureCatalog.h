@@ -1,0 +1,131 @@
+#pragma once
+
+#include <array>
+#include <cstdint>
+#include <string_view>
+
+namespace Rectify12::Features {
+    enum class Category : std::uint8_t {
+        Shell,
+        Dialogs,
+        Archives,
+        Explorer,
+        System,
+        Recovery,
+    };
+
+    struct FeatureDefinition {
+        std::uint16_t id;
+        std::wstring_view key;
+        std::wstring_view name;
+        Category category;
+    };
+
+    inline constexpr std::array<FeatureDefinition, 100> Catalog{{
+        {1, L"acrylic_taskbar_with_adaptive_blur", L"Acrylic taskbar with adaptive blur", Category::Shell},
+        {2, L"acrylic_start_menu", L"Acrylic Start menu", Category::Shell},
+        {3, L"acrylic_quick_settings", L"Acrylic Quick Settings", Category::Shell},
+        {4, L"acrylic_notification_centre", L"Acrylic notification centre", Category::Shell},
+        {5, L"acrylic_alt_tab_switcher", L"Acrylic Alt+Tab switcher", Category::Shell},
+        {6, L"acrylic_task_view", L"Acrylic Task View", Category::Shell},
+        {7, L"fluent_volume_flyout", L"Fluent volume flyout", Category::Shell},
+        {8, L"fluent_brightness_flyout", L"Fluent brightness flyout", Category::Shell},
+        {9, L"fluent_battery_flyout", L"Fluent battery flyout", Category::Shell},
+        {10, L"fluent_wi_fi_flyout", L"Fluent Wi-Fi flyout", Category::Shell},
+        {11, L"fluent_bluetooth_flyout", L"Fluent Bluetooth flyout", Category::Shell},
+        {12, L"fluent_clock_calendar_flyout", L"Fluent clock/calendar flyout", Category::Shell},
+        {13, L"fluent_removable_drive_notification_ui", L"Fluent removable-drive notification UI", Category::Shell},
+        {14, L"redesigned_shutdown_dialog", L"Redesigned shutdown dialog", Category::Shell},
+        {15, L"redesigned_ctrl_alt_del_screen_styling", L"Redesigned Ctrl+Alt+Del screen styling", Category::Shell},
+        {16, L"redesigned_uac_prompt", L"Redesigned UAC prompt", Category::Shell},
+        {17, L"redesigned_credential_prompt", L"Redesigned credential prompt", Category::Shell},
+        {18, L"modern_winui_run_dialog", L"Modern WinUI Run dialog", Category::Dialogs},
+        {19, L"modern_winver", L"Modern Winver", Category::Dialogs},
+        {20, L"modern_open_with", L"Modern Open With", Category::Dialogs},
+        {21, L"modern_file_folder_properties", L"Modern file/folder Properties", Category::Dialogs},
+        {22, L"modern_copy_move_dialog", L"Modern copy/move dialog", Category::Dialogs},
+        {23, L"modern_file_conflict_resolver", L"Modern file-conflict resolver", Category::Dialogs},
+        {24, L"modern_rename_conflict_dialog", L"Modern rename conflict dialog", Category::Dialogs},
+        {25, L"modern_delete_confirmation", L"Modern delete confirmation", Category::Dialogs},
+        {26, L"modern_zip_extraction_progress", L"Modern ZIP extraction progress", Category::Dialogs},
+        {27, L"modern_archive_creation_dialog", L"Modern archive creation dialog", Category::Dialogs},
+        {28, L"native_7z_support", L"Native 7z support", Category::Archives},
+        {29, L"native_rar_support_where_licensing_permits", L"Native RAR support where licensing permits", Category::Archives},
+        {30, L"native_tar_gz_xz_browsing", L"Native TAR/GZ/XZ browsing", Category::Archives},
+        {31, L"archive_previews_without_extraction", L"Archive previews without extraction", Category::Archives},
+        {32, L"explorer_tab_groups", L"Explorer tab groups", Category::Explorer},
+        {33, L"vertical_explorer_tabs_option", L"Vertical Explorer tabs option", Category::Explorer},
+        {34, L"saved_explorer_workspaces", L"Saved Explorer workspaces", Category::Explorer},
+        {35, L"split_pane_explorer", L"Split-pane Explorer", Category::Explorer},
+        {36, L"dual_folder_comparison_mode", L"Dual-folder comparison mode", Category::Explorer},
+        {37, L"folder_size_shown_directly_in_explorer", L"Folder size shown directly in Explorer", Category::Explorer},
+        {38, L"instant_directory_size_calculation_cache", L"Instant directory-size calculation cache", Category::Explorer},
+        {39, L"better_file_previews", L"Better file previews", Category::Explorer},
+        {40, L"markdown_preview_handler", L"Markdown preview handler", Category::Explorer},
+        {41, L"svg_preview_handler", L"SVG preview handler", Category::Explorer},
+        {42, L"json_xml_formatted_preview", L"JSON/XML formatted preview", Category::Explorer},
+        {43, L"source_code_preview_handler", L"Source-code preview handler", Category::Explorer},
+        {44, L"audio_waveform_previews", L"Audio waveform previews", Category::Explorer},
+        {45, L"video_metadata_previews", L"Video metadata previews", Category::Explorer},
+        {46, L"exif_viewer_built_into_details_pane", L"EXIF viewer built into Details pane", Category::Explorer},
+        {47, L"hashes_directly_in_properties", L"Hashes directly in Properties", Category::Explorer},
+        {48, L"sha256_md5_context_menu_actions", L"SHA-256/MD5 context-menu actions", Category::Explorer},
+        {49, L"copy_file_hash_button", L"Copy file hash button", Category::Explorer},
+        {50, L"copy_full_path_button_everywhere", L"Copy full path button everywhere", Category::Explorer},
+        {51, L"open_powershell_here", L"Open PowerShell here", Category::Explorer},
+        {52, L"open_command_prompt_here", L"Open Command Prompt here", Category::Explorer},
+        {53, L"open_terminal_here", L"Open Terminal here", Category::Explorer},
+        {54, L"open_vs_code_here", L"Open VS Code here", Category::Explorer},
+        {55, L"full_third_party_context_menu_by_default", L"Full third-party context menu by default", Category::Explorer},
+        {56, L"searchable_context_menu", L"Searchable context menu", Category::Explorer},
+        {57, L"context_menu_favourites", L"Context-menu favourites", Category::Explorer},
+        {58, L"context_menu_extension_manager", L"Context-menu extension manager", Category::Explorer},
+        {59, L"disable_broken_shell_extensions_per_app", L"Disable broken shell extensions per app", Category::Explorer},
+        {60, L"explorer_crash_isolation_for_extensions", L"Explorer crash isolation for extensions", Category::Explorer},
+        {61, L"restart_explorer_button_in_settings", L"Restart Explorer button in Settings", Category::Explorer},
+        {62, L"explorer_safe_mode", L"Explorer safe mode", Category::Explorer},
+        {63, L"explorer_patch_rollback", L"Explorer patch rollback", Category::Explorer},
+        {64, L"per_folder_view_profiles", L"Per-folder view profiles", Category::Explorer},
+        {65, L"remember_sort_view_per_location_reliably", L"Remember sort/view per location reliably", Category::Explorer},
+        {66, L"better_network_share_browser", L"Better network-share browser", Category::Explorer},
+        {67, L"faster_network_drive_reconnect", L"Faster network-drive reconnect", Category::Explorer},
+        {68, L"modern_map_network_drive_ui", L"Modern Map Network Drive UI", Category::Explorer},
+        {69, L"modern_folder_sharing_ui", L"Modern folder-sharing UI", Category::Explorer},
+        {70, L"modern_ntfs_permissions_editor", L"Modern NTFS permissions editor", Category::Explorer},
+        {71, L"modern_environment_variables_editor", L"Modern Environment Variables editor", Category::System},
+        {72, L"modern_services_manager", L"Modern Services manager", Category::System},
+        {73, L"modern_device_manager_frontend", L"Modern Device Manager frontend", Category::System},
+        {74, L"modern_disk_management_frontend", L"Modern Disk Management frontend", Category::System},
+        {75, L"modern_computer_management_frontend", L"Modern Computer Management frontend", Category::System},
+        {76, L"modern_event_viewer_frontend", L"Modern Event Viewer frontend", Category::System},
+        {77, L"modern_task_scheduler_frontend", L"Modern Task Scheduler frontend", Category::System},
+        {78, L"modern_windows_features_frontend", L"Modern Windows Features frontend", Category::System},
+        {79, L"modern_system_restore_frontend", L"Modern System Restore frontend", Category::System},
+        {80, L"modern_advanced_system_settings", L"Modern Advanced System Settings", Category::System},
+        {81, L"modern_power_plan_editor", L"Modern power-plan editor", Category::System},
+        {82, L"modern_advanced_sound_device_properties", L"Modern advanced sound-device properties", Category::System},
+        {83, L"modern_mouse_properties", L"Modern mouse properties", Category::System},
+        {84, L"modern_keyboard_properties", L"Modern keyboard properties", Category::System},
+        {85, L"modern_autoplay_settings", L"Modern AutoPlay settings", Category::System},
+        {86, L"modern_fonts_manager", L"Modern Fonts manager", Category::System},
+        {87, L"modern_colour_management_frontend", L"Modern colour-management frontend", Category::System},
+        {88, L"modern_default_app_association_editor", L"Modern default-app association editor", Category::System},
+        {89, L"modern_firewall_rules_viewer", L"Modern firewall rules viewer", Category::System},
+        {90, L"modern_network_adapter_properties", L"Modern network-adapter properties", Category::System},
+        {91, L"per_component_rectify12_rollback", L"Per-component Rectify12 rollback", Category::Recovery},
+        {92, L"restore_original_windows_ui_toggle", L"Restore original Windows UI toggle", Category::Recovery},
+        {93, L"compatibility_exclusions_per_executable", L"Compatibility exclusions per executable", Category::Recovery},
+        {94, L"automatic_exclusion_when_a_hook_crashes_repeatedly", L"Automatic exclusion when a hook crashes repeatedly", Category::Recovery},
+        {95, L"rectify12_repair_mode", L"Rectify12 repair mode", Category::Recovery},
+        {96, L"rectify12_safe_boot_profile", L"Rectify12 safe boot profile", Category::Recovery},
+        {97, L"settings_export_import", L"Settings export/import", Category::Recovery},
+        {98, L"visual_style_profiles", L"Visual-style profiles", Category::Recovery},
+        {99, L"automatic_restore_snapshot_before_major_changes", L"Automatic restore snapshot before major Rectify12 changes", Category::Recovery},
+        {100, L"one_click_rectify_windows_health_check", L"One-click Rectify Windows health check", Category::Recovery},
+    }};
+
+    inline constexpr const FeatureDefinition* Find(std::uint16_t id) noexcept {
+        if (id == 0 || id > Catalog.size()) return nullptr;
+        return &Catalog[id - 1];
+    }
+}
