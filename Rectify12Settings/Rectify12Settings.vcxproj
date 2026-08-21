@@ -61,10 +61,12 @@
   <!-- Rectify12 Settings only consumes WinUI and the Windows App SDK runtime.
        Avoid the monolithic meta-package here because it pulls optional AI/ML
        packages into this native UI process even though Rectify12 Settings does
-       not use those APIs. -->
+       not use those APIs. Runtime 2.4 expects InteractiveExperiences 2.1.6, so
+       pin that component to prevent WinUI's older transitive version winning. -->
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.4.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.6" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.6" />
     <PackageReference Include="Microsoft.Windows.CppWinRT" Version="3.0.260818.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2526" />
   </ItemGroup>
