@@ -20,7 +20,7 @@ namespace Rectify12::Settings {
         bool enabled = true;
         bool replaceGenericDark = true;
         bool patchExplorer = true;
-        Backdrop backdrop = Backdrop::Mica;
+        Backdrop backdrop = Backdrop::Acrylic;
     };
 
     inline DWORD ReadDword(HKEY key, const wchar_t* name, DWORD fallback) {
@@ -43,7 +43,7 @@ namespace Rectify12::Settings {
         prefs.replaceGenericDark = ReadDword(key, ValueReplaceGenericDark, 1) != 0;
         prefs.patchExplorer = ReadDword(key, ValuePatchExplorer, 1) != 0;
 
-        const DWORD backdrop = ReadDword(key, ValueBackdrop, static_cast<DWORD>(Backdrop::Mica));
+        const DWORD backdrop = ReadDword(key, ValueBackdrop, static_cast<DWORD>(Backdrop::Acrylic));
         switch (backdrop) {
         case static_cast<DWORD>(Backdrop::Acrylic):
             prefs.backdrop = Backdrop::Acrylic;
@@ -52,8 +52,10 @@ namespace Rectify12::Settings {
             prefs.backdrop = Backdrop::MicaAlt;
             break;
         case static_cast<DWORD>(Backdrop::Mica):
-        default:
             prefs.backdrop = Backdrop::Mica;
+            break;
+        default:
+            prefs.backdrop = Backdrop::Acrylic;
             break;
         }
 
