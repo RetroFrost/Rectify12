@@ -185,13 +185,10 @@ int InitInstaller() {
         MainLogger.WriteLine(L"This Windows Build is not supported. Windows 10 Build 21343 and above is required.", err);
         return err;
     }
-    if (!InternetCheckConnection(L"https://www.microsoft.com/", FLAG_ICC_FORCE_CONNECTION, 0)) {
-        err = -69;
-        TaskDialog(NULL, NULL, L"Rectify12", L"Internet connection required", L"Some installation components require an active internet connection.", TDCBF_OK_BUTTON, TD_ERROR_ICON, NULL);
-        MainLogger.WriteLine(L"Rectify12 requires an active internet connection for online installation components.", err);
-        return err;
-    }
 
+    // Don't equate reachability of one website with system connectivity. Local
+    // payload steps can still succeed behind proxies/firewalls, while individual
+    // online child processes must report their own failures to the install engine.
     MainLogger.WriteLine(L"Initializing pages...\n\n\n");
     err = InitPages();
     if (FAILED(err)) {
