@@ -18,14 +18,18 @@ namespace {
     void SetProgressText(const wchar_t* text) {
         {
             std::lock_guard<std::mutex> lock(IEngineWrapper::progressMutex);
-            IEngineWrapper::currprogress = text;
+            IEngineWrapper::currprogress = text ? text : L"";
         }
         if (pwnd) PostMessageW(pwnd->GetHWND(), WM_UPDATEPROGRESS, 0, 0);
     }
 
-    unsigned long FailInstall(const wchar_t* stage) {
-        InstallationLogger.WriteLine(L"Installation stopped because a required stage failed: " + std::wstring(stage));
-        SetProgressText(L"Installation failed. Review Installation.log before retrying.");
+    unsigned long FailOperation(const wchar_t* operation, const wchar_t* stage) {
+        const std::wstring operationName = operation ? operation : L"Setup";
+        const std::wstring stageName = stage ? stage : L"Unknown stage";
+        InstallationLogger.WriteLine(operationName + L" stopped because a required stage failed: " + stageName);
+
+        const std::wstring progress = operationName + L" failed. Review Installation.log before retrying.";
+        SetProgressText(progress.c_str());
         if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPFAILED, 0, 0);
         return ERROR_INSTALL_FAILURE;
     }
@@ -49,32 +53,45 @@ unsigned long IEngineWrapper::BeginRestartAnim(LPVOID) {
 
 unsigned long IEngineWrapper::BeginInstall(LPVOID) {
     SetProgressText(L"Extracting files...");
-    if (!extractFiles()) return FailInstall(L"Extracting files");
+    if (!extractFiles()) return FailOperation(L"Installation", L"Extracting files");
 
     SetProgressText(L"Copying files...");
-    if (!MoveFilesToTarget()) return FailInstall(L"Copying files");
+    if (!MoveFilesToTarget()) return FailOperation(L"Installation", L"Copying files");
 
     SetProgressText(L"Installing fonts...");
-    if (!InstallFonts()) return FailInstall(L"Installing fonts");
+    if (!InstallFonts()) return FailOperation(L"Installation", L"Installing fonts");
 
     SetProgressText(L"Installing programs...");
-    if (!InstallPrograms()) return FailInstall(L"Installing programs");
+    if (!InstallPrograms()) return FailOperation(L"Installation", L"Installing programs");
 
     SetProgressText(L"Installing tweaks...");
-    if (!RegisterWHMods()) return FailInstall(L"Installing tweaks");
+    if (!RegisterWHMods()) return FailOperation(L"Installation", L"Installing tweaks");
 
     SetProgressText(L"Finishing installation...");
-    if (!FinaliseInstall()) return FailInstall(L"Finalising installation");
+    if (!FinaliseInstall()) return FailOperation(L"Installation", L"Finalising installation");
 
     if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPCOMPLETE, 0, 0);
     return ERROR_SUCCESS;
 }
 
 unsigned long IEngineWrapper::BeginUninstall(LPVOID) {
-    SetProgressText(L"Uninstalling...");
-    RemoveWHMods();
+    SetProgressText(L"Restoring system settings...");
+    if (!RestoreDefenderSettingsIfNeeded()) {
+        return FailOperation(L"Uninstallation", L"Restoring Microsoft Defender settings");
+    }
+
+    SetProgressText(L"Removing Rectify12 modules...");
+    if (!RemoveWHMods()) {
+        return FailOperation(L"Uninstallation", L"Removing Rectify12 modules");
+    }
+
     RemoveSecureUX();
-    FinaliseUninstall();
+
+    SetProgressText(L"Finishing uninstallation...");
+    if (!FinaliseUninstall()) {
+        return FailOperation(L"Uninstallation", L"Finalising uninstallation");
+    }
+
     if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPCOMPLETE, 0, 0);
     return ERROR_SUCCESS;
 }
