@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.34902.97
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.0.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rectify11Installer", "Rectify11Installer\Rectify11Installer.vcxproj", "{E1E56D3B-A7CF-4068-9BA9-279570E7E081}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rectify12ControlPanel", "Rectify12ControlPanel\Rectify12ControlPanel.vcxproj", "{A4C56732-56B0-4A92-8940-73DA21AF0FB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,14 @@ Global
 		{E1E56D3B-A7CF-4068-9BA9-279570E7E081}.Release|x64.Build.0 = Release|x64
 		{E1E56D3B-A7CF-4068-9BA9-279570E7E081}.Release|x86.ActiveCfg = Release|Win32
 		{E1E56D3B-A7CF-4068-9BA9-279570E7E081}.Release|x86.Build.0 = Release|Win32
+		{A4C56732-56B0-4A92-8940-73DA21AF0FB2}.Debug|x64.ActiveCfg = Debug|x64
+		{A4C56732-56B0-4A92-8940-73DA21AF0FB2}.Debug|x64.Build.0 = Debug|x64
+		{A4C56732-56B0-4A92-8940-73DA21AF0FB2}.Debug|x86.ActiveCfg = Debug|Win32
+		{A4C56732-56B0-4A92-8940-73DA21AF0FB2}.Debug|x86.Build.0 = Debug|Win32
+		{A4C56732-56B0-4A92-8940-73DA21AF0FB2}.Release|x64.ActiveCfg = Release|x64
+		{A4C56732-56B0-4A92-8940-73DA21AF0FB2}.Release|x64.Build.0 = Release|x64
+		{A4C56732-56B0-4A92-8940-73DA21AF0FB2}.Release|x86.ActiveCfg = Release|Win32
+		{A4C56732-56B0-4A92-8940-73DA21AF0FB2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
