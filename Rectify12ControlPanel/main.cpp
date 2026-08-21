@@ -43,7 +43,9 @@ namespace {
         const MARGINS margins{ -1, -1, -1, -1 };
         DwmExtendFrameIntoClientArea(hwnd, &margins);
 
-        const DWM_SYSTEMBACKDROP_TYPE backdrop = DWMSBT_MAINWINDOW;
+        // Rectify12 is Acrylic-first. Mica and Mica Alt remain user-selectable
+        // effect policies for patched Windows surfaces.
+        const DWM_SYSTEMBACKDROP_TYPE backdrop = DWMSBT_TRANSIENTWINDOW;
         DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
     }
 
@@ -254,7 +256,6 @@ namespace {
         }
 
         case WM_ERASEBKGND:
-            // DWM owns the client-area backdrop.
             return 1;
 
         case WM_DESTROY:
