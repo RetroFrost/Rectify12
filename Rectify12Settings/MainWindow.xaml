@@ -20,6 +20,7 @@
                 <muxc:NavigationViewItem Content="File Manager &amp; Explorer" Tag="explorer"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Folder" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
                 <muxc:NavigationViewItem Content="Windows settings" Tag="legacy"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Repair" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
                 <muxc:NavigationViewItem Content="Compatibility" Tag="compatibility"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Admin" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
+                <muxc:NavigationViewItem Content="Misc" Tag="misc"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="More" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
                 <muxc:NavigationViewItem Content="Recovery" Tag="recovery"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Refresh" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
                 <muxc:NavigationViewItem Content="About" Tag="about"><muxc:NavigationViewItem.Icon><SymbolIcon Symbol="Help" /></muxc:NavigationViewItem.Icon></muxc:NavigationViewItem>
             </muxc:NavigationView.MenuItems>
@@ -75,6 +76,20 @@
                                 <TextBlock Text="Executable names here are excluded from Rectify12 visual hooks. Separate multiple names with semicolons." TextWrapping="Wrap" MaxWidth="680" Opacity="0.72" />
                                 <TextBox x:Name="ExclusionsEditor" PlaceholderText="example.exe; legacyapp.exe" Width="520" HorizontalAlignment="Left" />
                                 <Button Content="Save exclusions" Click="SaveExclusions_Click" HorizontalAlignment="Left" />
+                            </StackPanel>
+
+                            <StackPanel x:Name="MiscActions" Visibility="Collapsed" Spacing="10">
+                                <TextBlock Text="File-system compatibility" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <TextBlock Text="Enable Windows' Win32 long-path policy. Rectify12 executables also opt in through their manifests. Older third-party apps that hard-code the 260-character limit can still reject long paths." TextWrapping="Wrap" MaxWidth="720" Opacity="0.72" />
+                                <Button Content="Enable Win32 long paths" Click="EnableLongPaths_Click" HorizontalAlignment="Left" />
+
+                                <TextBlock Margin="0,14,0,0" Text="Microsoft Defender performance" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <TextBlock Text="Tune scheduled scans to use low CPU priority, an average 30% CPU target and idle-time scheduling. Real-time, script and network protection are not disabled. Rectify12 saves the previous scan values before changing them." TextWrapping="Wrap" MaxWidth="720" Opacity="0.72" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Content="Optimise Defender" Click="OptimiseDefender_Click" />
+                                    <Button Content="Restore previous Defender scan settings" Click="RestoreDefender_Click" />
+                                </StackPanel>
+                                <TextBlock x:Name="MiscStatus" TextWrapping="Wrap" MaxWidth="720" Opacity="0.78" />
                             </StackPanel>
 
                             <StackPanel x:Name="RecoveryActions" Visibility="Collapsed" Spacing="8">
