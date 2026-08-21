@@ -8,11 +8,11 @@
 			<Element layout="borderlayout()" layoutpos="left">
 				<Richtext class="headertext" layoutpos="top" content="Welcome"/>
 				<Richtext class="instructiontext" layoutpos="top"
-				content="Welcome to Rectify11 Installation Wizard. It is recommended to save all your work and close all the apps."/>
+				content="Welcome to the Rectify12 Installation Wizard. Save your work and close other apps before continuing."/>
 				<Richtext class="instructiontext" layoutpos="top"
-				content="Please read notes and credits before proceeding, click Next to proceed, Exit to cancel the installation."/>
+				content="Rectify12 is being rebuilt around non-destructive resources, effects, and safer rollback. Click Next to continue or Exit to cancel."/>
 				<Richtext class="instructiontext" foreground="rgb(236,64,78)" layoutpos="top"
-				content="Warning: This is a beta build of Rectify11, do NOT use it on your main PC."/>
+				content="Warning: Rectify12 is currently a development build. Test it on a disposable Windows installation or VM first."/>
 				<Element layout="borderlayout()" layoutpos="top">
 					<Element layout="flowlayout()" padding="rect(10rp,15rp,0,0)"  layoutpos="left">
 						<TouchButton class="NormalButton" id="atom(credits)" height="35rp" width="140rp" content="Credits"/>
