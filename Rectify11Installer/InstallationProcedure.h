@@ -4,12 +4,19 @@
 #ifndef MY_HEADERPROC_H
 #define MY_HEADERPROC_H
 
-void extractFiles();
-void MoveFilesToTarget();
-void InstallPrograms();
-void RegisterWHMods();
+struct ProcessResult {
+    bool success = false;
+    DWORD error = ERROR_SUCCESS;
+    DWORD exitCode = 0;
+};
+
+bool extractFiles();
+bool MoveFilesToTarget();
+bool InstallPrograms();
+bool RegisterWHMods();
 void SetupComplete();
-void InstallFonts();
-void RunEXE(wchar_t exe[], wchar_t args[]);
-void FinaliseInstall();
+bool InstallFonts();
+ProcessResult RunEXE(const wchar_t* exe, wchar_t* args, DWORD timeoutMilliseconds = 300000);
+bool FinaliseInstall();
+
 #endif
