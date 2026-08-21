@@ -1,5 +1,5 @@
-// Rectify11Installer.cpp : Defines the entry point for the application.
-//
+// Rectify12 installer entry point. The source filename is retained temporarily
+// to keep the inherited Visual Studio project layout stable during the rewrite.
 #include "framework.h"
 #include "Rectify11Installer.h"
 #include "resource.h"
@@ -12,6 +12,8 @@
 #include "InstallerEngine.h"
 #include "Logger.h"
 #include "MiscWindow.h"
+#include "EffectsEngine.h"
+#include "ProductInfo.h"
 
 using namespace DirectUI;
 using namespace std;
@@ -53,6 +55,8 @@ Logger InstallationLogger;
 bool uninstall = false;
 
 wchar_t currdir[MAX_PATH] = {};
+// r11dir still refers to the inherited payload folder packaged beside the installer.
+// It will be renamed when the payload archive itself is migrated to Rectify12.
 wchar_t r11dir[MAX_PATH] = {};
 wchar_t r11targetdir[MAX_PATH] = {};
 wchar_t windir[MAX_PATH] = {};
@@ -83,7 +87,6 @@ void NavBack(Element* elem, Event* iev) {
 void NavISO(Element* elem, Event* iev) {
     if (iev->type == TouchButton::Click) {
         Navigate();
-        
     }
 }
 
@@ -91,7 +94,6 @@ void NavSYS(Element* elem, Event* iev) {
     if (iev->type == TouchButton::Click) {
         nxt = 4;
         Navigate();
-        
     }
 }
 
@@ -112,7 +114,7 @@ void NavNone(Element* elem, Event* iev) {
 void HandleThemesChk(Element* elem, Event* iev) {
     TouchCheckBox* tch = (TouchCheckBox*)elem;
     if (iev->type == TouchButton::Click) {
-        if (tch->GetCheckedState() == CheckedStateFlags_CHECKED) { 
+        if (tch->GetCheckedState() == CheckedStateFlags_CHECKED) {
             tch->SetCheckedState(CheckedStateFlags_NONE);
             InstallFlags[L"INSTALLTHEMES"] = false;
         }
@@ -126,12 +128,12 @@ void HandleThemesChk(Element* elem, Event* iev) {
 void HandleAsdfChk(Element* elem, Event* iev) {
     TouchCheckBox* tch = (TouchCheckBox*)elem;
     if (iev->type == TouchButton::Click) {
-        if (tch->GetCheckedState() == CheckedStateFlags_CHECKED) { 
-            tch->SetCheckedState(CheckedStateFlags_NONE); 
+        if (tch->GetCheckedState() == CheckedStateFlags_CHECKED) {
+            tch->SetCheckedState(CheckedStateFlags_NONE);
             InstallFlags[L"INSTALLASDF"] = false;
         }
-        else { 
-            tch->SetCheckedState(CheckedStateFlags_CHECKED); 
+        else {
+            tch->SetCheckedState(CheckedStateFlags_CHECKED);
             InstallFlags[L"INSTALLASDF"] = true;
         }
     }
@@ -141,10 +143,10 @@ void HandleWinverChk(Element* elem, Event* iev) {
     TouchCheckBox* tch = (TouchCheckBox*)elem;
     if (iev->type == TouchButton::Click) {
         if (tch->GetCheckedState() == CheckedStateFlags_CHECKED) {
-            tch->SetCheckedState(CheckedStateFlags_NONE); 
+            tch->SetCheckedState(CheckedStateFlags_NONE);
             InstallFlags[L"INSTALLWINVERSHUTDOWN"] = false;
         }
-        else { 
+        else {
             tch->SetCheckedState(CheckedStateFlags_CHECKED);
             InstallFlags[L"INSTALLWINVERSHUTDOWN"] = true;
         }
@@ -154,12 +156,12 @@ void HandleWinverChk(Element* elem, Event* iev) {
 void HandleExplorerChk(Element* elem, Event* iev) {
     TouchCheckBox* tch = (TouchCheckBox*)elem;
     if (iev->type == TouchButton::Click) {
-        if (tch->GetCheckedState() == CheckedStateFlags_CHECKED) { 
-            tch->SetCheckedState(CheckedStateFlags_NONE); 
+        if (tch->GetCheckedState() == CheckedStateFlags_CHECKED) {
+            tch->SetCheckedState(CheckedStateFlags_NONE);
             InstallFlags[L"INSTALLEXP"] = false;
         }
-        else { 
-            tch->SetCheckedState(CheckedStateFlags_CHECKED); 
+        else {
+            tch->SetCheckedState(CheckedStateFlags_CHECKED);
             InstallFlags[L"INSTALLEXP"] = true;
         }
     }
@@ -180,31 +182,37 @@ void HandleIconChk(Element* elem, Event* iev) {
 }
 
 void SetBackdrop() {
+    Rectify12::Effects::WindowEffectOptions options;
+    options.immersiveDark = !GetUserAppMode();
+    options.extendFrame = true;
+    options.backdrop = Rectify12::Effects::BackdropKind::MicaAlt;
 
-    MARGINS margins = { -1, -1, -1, -1 };
-    BOOL value = TRUE;
-    if (!GetUserAppMode())DwmSetWindowAttribute(pwnd->GetHWND(), DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
-    if (CheckVer(22523)) {
-        DwmExtendFrameIntoClientArea(pwnd->GetHWND(), &margins);
-        DwmSetWindowAttribute(pwnd->GetHWND(), DWMWA_USE_HOSTBACKDROPBRUSH, &value, sizeof(value));
-        DWM_SYSTEMBACKDROP_TYPE backdrop_type = DWMSBT_TABBEDWINDOW;
-        DwmSetWindowAttribute(pwnd->GetHWND(), DWMWA_SYSTEMBACKDROP_TYPE, &backdrop_type, sizeof(backdrop_type));
+    const HRESULT effectResult = Rectify12::Effects::ApplyWindowEffects(pwnd->GetHWND(), options);
+    if (FAILED(effectResult)) {
+        // Effects are an enhancement, not a reason to make the installer unusable.
+        MainLogger.WriteLine(L"Rectify12 effects engine could not apply the preferred installer backdrop.", effectResult);
     }
 }
 
-
 void OpenCredits(Element* elem, Event* iev) {
     if (iev->type == TouchButton::Click) {
-
         InitMiscWindow(false, pMain->GetSheet(), hinst);
     }
 }
 
 bool DetectUninstall() {
-    LPCWSTR path = L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Rectify";
     HKEY hKey;
-    DWORD lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, path, 0, KEY_READ, &hKey);
-    if (lResult == ERROR_SUCCESS) return true;
+    const DWORD lResult = RegOpenKeyEx(
+        HKEY_LOCAL_MACHINE,
+        Rectify12::UninstallRegistryPath,
+        0,
+        KEY_READ,
+        &hKey);
+
+    if (lResult == ERROR_SUCCESS) {
+        RegCloseKey(hKey);
+        return true;
+    }
     return false;
 }
 
@@ -217,10 +225,11 @@ LRESULT CALLBACK SubclassWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
                     MainLogger.WriteLine(L"Failed to change stylesheet.", err);
                     return err;
                 }
+                SetBackdrop();
             }
             break;
         }
-        case WM_UPDATEANIMATIONFRAME: {  
+        case WM_UPDATEANIMATIONFRAME: {
             V = Value::CreateString((UCString)MAKEINTRESOURCE(currframe), hinst);
             waitAnimation->SetValue(RichText::ContentProp, 2, V);
             currframe++;
@@ -261,8 +270,6 @@ LRESULT CALLBACK SubclassWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
-
-
     InstallFlags[L"NONE"] = true;
     InstallFlags[L"INSTALLICONS"] = true;
     InstallFlags[L"INSTALLTHEMES"] = true;
@@ -297,10 +304,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     wstring ws(currdir);
 
     GetEnvironmentVariable(L"systemroot", windir, MAX_PATH);
+    // The payload directory still uses the inherited name until Files.7z is repackaged.
     StringCchPrintf(r11dir, MAX_PATH, L"%s\\Rectify11", currdir);
-    StringCchPrintf(r11targetdir, MAX_PATH, L"%s\\Rectify11", windir);
+    StringCchPrintf(r11targetdir, MAX_PATH, L"%s\\%s", windir, Rectify12::InstallFolder);
 
-    MainLogger.StartLogger((ws+L"\\Initialization.log").c_str());
+    MainLogger.StartLogger((ws + L"\\Initialization.log").c_str());
     NavLogger.StartLogger((ws + L"\\Navigation.log").c_str());
     InstallationLogger.StartLogger((ws + L"\\Installation.log").c_str());
 
@@ -317,7 +325,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     animArr.push_back(NULL);
 
     uninstall = DetectUninstall();
-
 
     err = InitProcessPriv(14, NULL, NULL, false);
     MainLogger.WriteLine(L"InitProcessPriv() completed", err);
@@ -348,7 +355,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         MainLogger.WriteLine(L"Failed to create installer window.");
         return err;
     }
-    
+
     SetBackdrop();
     WndProc = (WNDPROC)SetWindowLongPtrW(pwnd->GetHWND(), GWLP_WNDPROC, (LONG_PTR)SubclassWindowProc);
     err = DUIXmlParser::Create(&pParser, NULL, NULL, NULL, NULL);
@@ -366,7 +373,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     }
 
     err = HWNDElement::Create(pwnd->GetHWND(), true, 0, NULL, &dKey, (Element**)&HElement);
-    MainLogger.WriteLine(L"HWNDElement::Create()  complete", err);
+    MainLogger.WriteLine(L"HWNDElement::Create() complete", err);
     if (FAILED(err)) {
         MainLogger.WriteLine(L"Failed to create host hwndelement");
         return err;
@@ -408,4 +415,3 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     return err;
 }
-
