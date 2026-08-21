@@ -12,10 +12,10 @@ int InitUninstPages() {
     for (int i = 1; i < MAXUNINSTPAGE; i++) {
 
         Element* page;
-        MainLogger.WriteLine(L"Setting XML parser from resource: " + to_wstring(IDR_UIFILE8 + i));
+        MainLogger.WriteLine(L"Setting XML parser from resource: " + std::to_wstring(IDR_UIFILE8 + i));
         err2 = pParser->SetXMLFromResource(IDR_UIFILE8 + i, hinst, hinst);
         if (FAILED(err2)) {
-            MainLogger.WriteLine(L"failed to set XML parser from resource: " + to_wstring(IDR_UIFILE8 + i), err2);
+            MainLogger.WriteLine(L"failed to set XML parser from resource: " + std::to_wstring(IDR_UIFILE8 + i), err2);
             return err2;
         }
 
@@ -51,7 +51,7 @@ int InitUninstPages() {
             return err2;
         }
 
-        MainLogger.WriteLine(L"Adding page " + to_wstring(i) + L" to page list");
+        MainLogger.WriteLine(L"Adding page " + std::to_wstring(i) + L" to page list");
         animArr.push_back(pAnimator);
         pageArr.push_back(pContainer);
 
@@ -88,7 +88,6 @@ void InitUninstControls() {
     }
 }
 
-
 int InitUninstaller() {
     if (!CheckVer(21343)) {
         err2 = -21343;
@@ -105,7 +104,7 @@ int InitUninstaller() {
         return err2;
     }
     InitUninstControls();
-    useless->SetContentString((UCString)L"Uninstalling Rectify11");
+    useless->SetContentString((UCString)L"Uninstalling Rectify12");
     err2 = ChangeSheet();
     if (FAILED(err2)) {
         MainLogger.WriteLine(L"Failed to change stylesheet.", err2);
