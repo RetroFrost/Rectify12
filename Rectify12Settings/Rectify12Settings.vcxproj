@@ -58,19 +58,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'"><ClCompile><PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'"><ClCompile><PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile><Link><EnableCOMDATFolding>true</EnableCOMDATFolding><OptimizeReferences>true</OptimizeReferences></Link></ItemDefinitionGroup>
 
+  <!-- Rectify12 Settings only consumes WinUI and the Windows App SDK runtime.
+       Avoid the monolithic meta-package here because it pulls optional AI/ML
+       packages into this native UI process even though Rectify12 Settings does
+       not use those APIs. -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.Base" Version="2.0.4" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.Foundation" Version="2.3.9" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.6" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.6" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.DWrite" Version="2.1.0" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.Widgets" Version="2.0.5" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.4.4" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.ML" Version="2.1.74" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.Search" Version="2.4.4" />
     <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.4.0" />
-    <PackageReference Include="Microsoft.Windows.AI.MachineLearning" Version="2.1.74" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.6" />
     <PackageReference Include="Microsoft.Windows.CppWinRT" Version="3.0.260818.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2526" />
   </ItemGroup>
@@ -79,7 +73,11 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="App.xaml.h"><DependentUpon>App.xaml</DependentUpon></ClInclude>
     <ClInclude Include="MainWindow.xaml.h"><DependentUpon>MainWindow.xaml</DependentUpon></ClInclude>
+    <ClInclude Include="EffectsPolicy.h" />
+    <ClInclude Include="FeatureCatalog.h" />
+    <ClInclude Include="RuntimePolicy.h" />
     <ClInclude Include="SettingsRoutes.h" />
+    <ClInclude Include="SystemActions.h" />
   </ItemGroup>
   <ItemGroup><ApplicationDefinition Include="App.xaml" /><Page Include="MainWindow.xaml" /></ItemGroup>
   <ItemGroup>
