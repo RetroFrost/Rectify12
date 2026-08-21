@@ -1,0 +1,48 @@
+name: Build Rectify12 Settings
+
+on:
+  push:
+    branches:
+      - rectify12-foundation
+    paths:
+      - 'Rectify12Settings/**'
+      - 'Rectify12Settings.sln'
+      - '.github/workflows/build-settings.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'Rectify12Settings/**'
+      - 'Rectify12Settings.sln'
+      - '.github/workflows/build-settings.yml'
+  workflow_dispatch:
+
+jobs:
+  build-settings-x64:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Set up NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore WinUI dependencies
+        shell: pwsh
+        run: nuget restore Rectify12Settings.sln -PackagesDirectory packages -NonInteractive
+
+      - name: Build Rectify12 Settings
+        shell: pwsh
+        run: msbuild Rectify12Settings.sln /m /p:Configuration=Release /p:Platform=x64
+
+      - name: Upload Settings binary
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rectify12-Settings-x64
+          path: bin/x64/Release/Settings/**
+          if-no-files-found: error
