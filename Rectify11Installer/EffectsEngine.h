@@ -13,7 +13,7 @@ namespace Rectify12::Effects {
     struct WindowEffectOptions {
         bool immersiveDark = true;
         bool extendFrame = true;
-        BackdropKind backdrop = BackdropKind::Mica;
+        BackdropKind backdrop = BackdropKind::Acrylic;
     };
 
     inline DWM_SYSTEMBACKDROP_TYPE ToDwmBackdrop(BackdropKind backdrop) {
