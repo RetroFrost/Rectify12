@@ -1,5 +1,6 @@
 #pragma once
 
-void RemoveWHMods();
+bool RestoreDefenderSettingsIfNeeded();
+bool RemoveWHMods();
 void RemoveSecureUX();
-void FinaliseUninstall();
+bool FinaliseUninstall();
