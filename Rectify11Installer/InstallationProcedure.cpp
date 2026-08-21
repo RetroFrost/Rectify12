@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <string>
+#include <utility>
 #include <vector>
 
 wchar_t path[MAX_PATH];
@@ -22,9 +23,9 @@ L"%r11files%\\media|%systemroot%\\media\\rectified|INSTALLTHEMES",
 std::wstring install_list[] = {
 L"msiexec.exe /i \"%r11files%\\SecureUxTheme_x64.msi\" /quiet /norestart|INSTALLTHEMES|AMD64",
 L"msiexec.exe /i \"%r11files%\\SecureUxTheme_ARM64.msi\" /quiet /norestart|INSTALLTHEMES|ARM64",
-L"%r11files%\\windhawk_setup_offline.exe /S|NONE",
-L"%r11files%\\SymChk\\symchk.exe \"%systemroot%\\Explorer.exe\" /s SRV*%programdata%\\Windhawk\\Engine\\symbols\\*http://msdl.microsoft.com/download/symbols|NONE",
-L"%r11files%\\SymChk\\symchk.exe \"%systemroot%\\system32\\Shlwapi.dll\" /s SRV*%programdata%\\Windhawk\\Engine\\symbols\\*http://msdl.microsoft.com/download/symbols|NONE"
+L"\"%r11files%\\windhawk_setup_offline.exe\" /S|NONE",
+L"\"%r11files%\\SymChk\\symchk.exe\" \"%systemroot%\\Explorer.exe\" /s SRV*%programdata%\\Windhawk\\Engine\\symbols\\*http://msdl.microsoft.com/download/symbols|NONE",
+L"\"%r11files%\\SymChk\\symchk.exe\" \"%systemroot%\\system32\\Shlwapi.dll\" /s SRV*%programdata%\\Windhawk\\Engine\\symbols\\*http://msdl.microsoft.com/download/symbols|NONE"
 };
 
 std::wstring mod_list[] = {
@@ -54,9 +55,10 @@ namespace {
 
     bool ExpandInstallPath(std::wstring& value) {
         constexpr wchar_t marker[] = L"%r11files%";
+        const std::size_t markerLength = wcslen(marker);
         std::size_t position = 0;
         while ((position = value.find(marker, position)) != std::wstring::npos) {
-            value.replace(position, std::size(marker) - 1, r11dir);
+            value.replace(position, markerLength, r11dir);
             position += wcslen(r11dir);
         }
 
@@ -241,12 +243,7 @@ bool InstallPrograms() {
         if (!shouldRun) continue;
 
         if (!ExpandInstallPath(fields[0])) return false;
-        if (FAILED(StringCchPrintfW(cmd, ARRAYSIZE(cmd), L"/c \"%s\"", fields[0].c_str())) ||
-            FAILED(StringCchPrintfW(path, ARRAYSIZE(path), L"%s\\System32\\cmd.exe", windir))) {
-            InstallationLogger.WriteLine(L"Program-install command exceeded the installer buffer.");
-            return false;
-        }
-        if (!RunEXE(path, cmd).success) return false;
+        if (!RunEXE(nullptr, fields[0].data()).success) return false;
     }
     return true;
 }
@@ -325,10 +322,14 @@ bool RegisterWHMods() {
 bool FinaliseInstall() {
     InstallationLogger.WriteLine(L"Finalising Rectify12 installation...");
 
+    const std::filesystem::path targetPath(r11targetdir);
     std::error_code directoryError;
-    std::filesystem::create_directories(std::filesystem::path(r11targetdir), directoryError);
-    if (directoryError && !std::filesystem::exists(std::filesystem::path(r11targetdir))) {
-        InstallationLogger.WriteLine(L"Could not create Rectify12 install directory: " + std::to_wstring(directoryError.value()));
+    std::filesystem::create_directories(targetPath, directoryError);
+    std::error_code existsError;
+    const bool targetExists = std::filesystem::exists(targetPath, existsError);
+    if (directoryError || existsError || !targetExists) {
+        const int errorValue = directoryError ? directoryError.value() : existsError.value();
+        InstallationLogger.WriteLine(L"Could not create Rectify12 install directory: " + std::to_wstring(errorValue));
         return false;
     }
 
