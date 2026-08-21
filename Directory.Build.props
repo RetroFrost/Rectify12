@@ -7,7 +7,8 @@
 
   <ItemDefinitionGroup Condition="'$(MSBuildProjectName)' == 'Rectify11Installer'">
     <ClCompile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
 </Project>
