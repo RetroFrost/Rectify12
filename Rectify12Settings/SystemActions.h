@@ -22,6 +22,27 @@ namespace Rectify12::SystemActions {
         std::wstring message;
     };
 
+    inline std::wstring EnvironmentValue(const wchar_t* name) {
+        const DWORD required = GetEnvironmentVariableW(name, nullptr, 0);
+        if (required == 0) return {};
+
+        std::vector<wchar_t> buffer(required, L'\0');
+        const DWORD written = GetEnvironmentVariableW(name, buffer.data(), static_cast<DWORD>(buffer.size()));
+        if (written == 0 || written >= buffer.size()) return {};
+        return std::wstring(buffer.data(), written);
+    }
+
+    inline std::wstring WindowsDirectory() {
+        std::vector<wchar_t> buffer(512, L'\0');
+        for (;;) {
+            const UINT written = GetWindowsDirectoryW(buffer.data(), static_cast<UINT>(buffer.size()));
+            if (written == 0) return {};
+            if (written < buffer.size()) return std::wstring(buffer.data(), written);
+            if (buffer.size() >= 32768) return {};
+            buffer.resize(std::min<std::size_t>(static_cast<std::size_t>(written) + 1, 32768), L'\0');
+        }
+    }
+
     inline Result RestartExplorer() {
         HWND shellWindow = GetShellWindow();
         if (!shellWindow) {
@@ -31,7 +52,7 @@ namespace Rectify12::SystemActions {
         DWORD processId = 0;
         GetWindowThreadProcessId(shellWindow, &processId);
         if (!processId) {
-            return { false, GetLastError(), L"Could not resolve the Explorer process." };
+            return { false, ERROR_NOT_FOUND, L"Could not resolve the Explorer process." };
         }
 
         HANDLE process = OpenProcess(PROCESS_TERMINATE | SYNCHRONIZE, FALSE, processId);
@@ -70,7 +91,15 @@ namespace Rectify12::SystemActions {
         begin.dwEventType = BEGIN_SYSTEM_CHANGE;
         begin.dwRestorePtType = MODIFY_SETTINGS;
         begin.llSequenceNumber = 0;
-        StringCchCopyNW(begin.szDescription, ARRAYSIZE(begin.szDescription), description.data(), description.size());
+        const std::size_t descriptionLength = std::min<std::size_t>(description.size(), ARRAYSIZE(begin.szDescription) - 1);
+        const HRESULT copyResult = StringCchCopyNW(
+            begin.szDescription,
+            ARRAYSIZE(begin.szDescription),
+            description.data(),
+            descriptionLength);
+        if (FAILED(copyResult)) {
+            return { false, ERROR_INVALID_PARAMETER, L"The restore snapshot description could not be prepared." };
+        }
 
         STATEMGRSTATUS status{};
         if (!SRSetRestorePointW(&begin, &status)) {
@@ -130,8 +159,14 @@ namespace Rectify12::SystemActions {
         exclusions.erase(
             std::remove_if(exclusions.begin(), exclusions.end(), [](const std::wstring& value) { return value.empty(); }),
             exclusions.end());
-        std::sort(exclusions.begin(), exclusions.end());
-        exclusions.erase(std::unique(exclusions.begin(), exclusions.end()), exclusions.end());
+        std::sort(exclusions.begin(), exclusions.end(), [](const std::wstring& left, const std::wstring& right) {
+            return _wcsicmp(left.c_str(), right.c_str()) < 0;
+        });
+        exclusions.erase(
+            std::unique(exclusions.begin(), exclusions.end(), [](const std::wstring& left, const std::wstring& right) {
+                return _wcsicmp(left.c_str(), right.c_str()) == 0;
+            }),
+            exclusions.end());
 
         std::vector<wchar_t> data;
         for (const auto& exclusion : exclusions) {
@@ -192,23 +227,52 @@ namespace Rectify12::SystemActions {
                    &size) == ERROR_SUCCESS;
     }
 
-    inline bool WriteDword(const wchar_t* subkey, const wchar_t* name, DWORD value) {
+    inline LSTATUS WriteDword(const wchar_t* subkey, const wchar_t* name, DWORD value) {
         HKEY key = nullptr;
         DWORD disposition = 0;
-        if (RegCreateKeyExW(HKEY_CURRENT_USER, subkey, 0, nullptr, 0, KEY_SET_VALUE, nullptr, &key, &disposition) != ERROR_SUCCESS) {
-            return false;
-        }
-        const LSTATUS result = RegSetValueExW(key, name, 0, REG_DWORD, reinterpret_cast<const BYTE*>(&value), sizeof(value));
+        const LSTATUS createResult = RegCreateKeyExW(
+            HKEY_CURRENT_USER,
+            subkey,
+            0,
+            nullptr,
+            0,
+            KEY_SET_VALUE,
+            nullptr,
+            &key,
+            &disposition);
+        if (createResult != ERROR_SUCCESS) return createResult;
+
+        const LSTATUS result = RegSetValueExW(
+            key,
+            name,
+            0,
+            REG_DWORD,
+            reinterpret_cast<const BYTE*>(&value),
+            sizeof(value));
         RegCloseKey(key);
-        return result == ERROR_SUCCESS;
+        return result;
+    }
+
+    inline bool IsAllowedEffectSetting(std::wstring_view name, DWORD value) {
+        if (name == L"Backdrop") return value >= 1 && value <= 3;
+        if (name == L"Enabled" || name == L"ReplaceGenericDark" || name == L"PatchExplorer" || name == L"ExplorerSafeMode") {
+            return value <= 1;
+        }
+        return false;
     }
 
     inline Result ExportSettings(const std::filesystem::path& file) {
         constexpr wchar_t EffectsKey[] = L"Software\\Rectify12\\Effects";
-        const wchar_t* values[] = { L"Enabled", L"ReplaceGenericDark", L"PatchExplorer", L"Backdrop" };
+        const wchar_t* values[] = {
+            L"Enabled",
+            L"ReplaceGenericDark",
+            L"PatchExplorer",
+            L"ExplorerSafeMode",
+            L"Backdrop"
+        };
 
         std::wofstream out(file, std::ios::trunc);
-        if (!out) return { false, GetLastError(), L"Could not create the Rectify12 settings file." };
+        if (!out) return { false, ERROR_OPEN_FAILED, L"Could not create the Rectify12 settings file." };
 
         out << L"R12CFG1\n";
         for (const auto* name : values) {
@@ -225,13 +289,21 @@ namespace Rectify12::SystemActions {
             out << exclusions[i];
         }
         out << L"\n";
+        out.flush();
 
+        if (!out) return { false, ERROR_WRITE_FAULT, L"Rectify12 settings could not be completely written." };
         return { true, ERROR_SUCCESS, L"Rectify12 settings exported." };
     }
 
     inline Result ImportSettings(const std::filesystem::path& file) {
         std::wifstream in(file);
-        if (!in) return { false, GetLastError(), L"Could not open the Rectify12 settings file." };
+        if (!in) {
+            return {
+                false,
+                std::filesystem::exists(file) ? ERROR_OPEN_FAILED : ERROR_FILE_NOT_FOUND,
+                L"Could not open the Rectify12 settings file."
+            };
+        }
 
         std::wstring line;
         if (!std::getline(in, line) || line != L"R12CFG1") {
@@ -240,6 +312,8 @@ namespace Rectify12::SystemActions {
 
         constexpr wchar_t EffectsKey[] = L"Software\\Rectify12\\Effects";
         std::vector<std::wstring> exclusions;
+        bool exclusionsPresent = false;
+
         while (std::getline(in, line)) {
             const auto split = line.find(L'=');
             if (split == std::wstring::npos) continue;
@@ -247,10 +321,19 @@ namespace Rectify12::SystemActions {
             const std::wstring value = line.substr(split + 1);
 
             if (key.rfind(L"Effects.", 0) == 0) {
+                const std::wstring valueName = key.substr(8);
                 try {
-                    const DWORD number = static_cast<DWORD>(std::stoul(value));
-                    if (!WriteDword(EffectsKey, key.c_str() + 8, number)) {
-                        return { false, GetLastError(), L"A Rectify12 effect setting could not be imported." };
+                    const unsigned long parsed = std::stoul(value);
+                    if (parsed > MAXDWORD) {
+                        return { false, ERROR_INVALID_DATA, L"A Rectify12 effect setting is outside the DWORD range." };
+                    }
+                    const DWORD number = static_cast<DWORD>(parsed);
+                    if (!IsAllowedEffectSetting(valueName, number)) {
+                        return { false, ERROR_INVALID_DATA, L"The settings file contains an unsupported Rectify12 effect value." };
+                    }
+                    const LSTATUS writeResult = WriteDword(EffectsKey, valueName.c_str(), number);
+                    if (writeResult != ERROR_SUCCESS) {
+                        return { false, static_cast<DWORD>(writeResult), L"A Rectify12 effect setting could not be imported." };
                     }
                 }
                 catch (...) {
@@ -258,6 +341,7 @@ namespace Rectify12::SystemActions {
                 }
             }
             else if (key == L"Compatibility.ExcludedExecutables") {
+                exclusionsPresent = true;
                 std::size_t start = 0;
                 while (start <= value.size()) {
                     const auto end = value.find(L';', start);
@@ -269,8 +353,14 @@ namespace Rectify12::SystemActions {
             }
         }
 
-        const auto exclusionsResult = SaveCompatibilityExclusions(std::move(exclusions));
-        if (!exclusionsResult.success) return exclusionsResult;
+        if (in.bad()) {
+            return { false, ERROR_READ_FAULT, L"The Rectify12 settings file could not be completely read." };
+        }
+
+        if (exclusionsPresent) {
+            const auto exclusionsResult = SaveCompatibilityExclusions(std::move(exclusions));
+            if (!exclusionsResult.success) return exclusionsResult;
+        }
 
         SendMessageTimeoutW(
             HWND_BROADCAST,
@@ -292,16 +382,20 @@ namespace Rectify12::SystemActions {
     inline std::vector<HealthItem> RunHealthCheck() {
         std::vector<HealthItem> items;
 
-        wchar_t windowsDirectory[MAX_PATH]{};
-        GetWindowsDirectoryW(windowsDirectory, ARRAYSIZE(windowsDirectory));
-        const std::filesystem::path rectifyRoot = std::filesystem::path(windowsDirectory) / L"Rectify12";
-        items.push_back({ L"Rectify12 installation", std::filesystem::exists(rectifyRoot), rectifyRoot.wstring() });
+        const std::wstring windowsDirectory = WindowsDirectory();
+        const std::filesystem::path rectifyRoot = windowsDirectory.empty()
+            ? std::filesystem::path{}
+            : std::filesystem::path(windowsDirectory) / L"Rectify12";
+        items.push_back({
+            L"Rectify12 installation",
+            !rectifyRoot.empty() && std::filesystem::exists(rectifyRoot),
+            rectifyRoot.empty() ? L"Windows directory could not be resolved." : rectifyRoot.wstring()
+        });
 
-        wchar_t programData[MAX_PATH]{};
-        const DWORD programDataLength = GetEnvironmentVariableW(L"ProgramData", programData, ARRAYSIZE(programData));
-        const std::filesystem::path windhawkMods = programDataLength
-            ? std::filesystem::path(programData) / L"Windhawk" / L"Engine" / L"Mods"
-            : std::filesystem::path{};
+        const std::wstring programData = EnvironmentValue(L"ProgramData");
+        const std::filesystem::path windhawkMods = programData.empty()
+            ? std::filesystem::path{}
+            : std::filesystem::path(programData) / L"Windhawk" / L"Engine" / L"Mods";
         items.push_back({
             L"Windhawk modules",
             !windhawkMods.empty() && std::filesystem::exists(windhawkMods),
@@ -309,13 +403,24 @@ namespace Rectify12::SystemActions {
 
         DWORD effectsEnabled = 0;
         const bool hasEffectsState = ReadDword(L"Software\\Rectify12\\Effects", L"Enabled", effectsEnabled);
-        items.push_back({ L"Effects settings", hasEffectsState, hasEffectsState ? L"Registry state is readable." : L"Defaults will be used." });
+        // A missing key is not corruption: Rectify12 intentionally has safe defaults.
+        items.push_back({
+            L"Effects settings",
+            true,
+            hasEffectsState ? L"Registry state is readable." : L"No explicit registry state; safe defaults are active."
+        });
 
         const auto exclusions = LoadCompatibilityExclusions();
         items.push_back({ L"Compatibility store", true, std::to_wstring(exclusions.size()) + L" executable exclusion(s)." });
 
-        const std::filesystem::path explorerPath = std::filesystem::path(windowsDirectory) / L"explorer.exe";
-        items.push_back({ L"Windows Explorer", std::filesystem::exists(explorerPath), explorerPath.wstring() });
+        const std::filesystem::path explorerPath = windowsDirectory.empty()
+            ? std::filesystem::path{}
+            : std::filesystem::path(windowsDirectory) / L"explorer.exe";
+        items.push_back({
+            L"Windows Explorer",
+            !explorerPath.empty() && std::filesystem::exists(explorerPath),
+            explorerPath.empty() ? L"Windows directory could not be resolved." : explorerPath.wstring()
+        });
 
         return items;
     }
