@@ -39,9 +39,10 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path artifacts | Out-Null
-          Get-ChildItem -Recurse -File -Include Rectify12Installer.exe,Rectify12ControlPanel.exe,Base.dll,Controls.dll,PageRes.dll,segoe_r11.ttf | ForEach-Object {
+          Get-ChildItem -Recurse -File -Include Rectify12Installer.exe,Rectify12ControlPanel.exe,Rectify12Frost.scr,Base.dll,Controls.dll,PageRes.dll,segoe_r11.ttf | ForEach-Object {
             Copy-Item $_.FullName -Destination artifacts -Force
           }
+          if (-not (Test-Path artifacts/Rectify12Frost.scr)) { throw 'Rectify12 screensaver was not built or packaged' }
           Copy-Item assets/cursors/Rectify12-cursors-jepricreations.zip artifacts/Rectify12-cursors-jepricreations.zip -Force
           Copy-Item docs/setup-contract.md artifacts/setup-contract.md -Force
 
@@ -65,3 +66,4 @@ jobs:
           name: Rectify12-foundation-x64
           path: artifacts
           if-no-files-found: error
+
