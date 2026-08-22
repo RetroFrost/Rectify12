@@ -34,9 +34,6 @@ namespace {
         const std::wstring progress = operationName + L" failed. Review Installation.log before retrying.";
         SetProgressText(progress.c_str());
 
-        // Clear this before posting the failure message. The UI failure handler closes
-        // the host after showing diagnostics, and that close must not be rejected by
-        // the active-operation guard.
         IEngineWrapper::operationRunning.store(false);
         if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPFAILED, 0, 0);
         return ERROR_INSTALL_FAILURE;
@@ -66,25 +63,14 @@ unsigned long IEngineWrapper::BeginInstall(LPVOID) {
         return ERROR_BUSY;
     }
 
-    SetProgressText(L"Extracting files...");
-    if (!extractFiles()) return FailOperation(L"Installation", L"Extracting files");
-
-    SetProgressText(L"Copying files...");
-    if (!MoveFilesToTarget()) return FailOperation(L"Installation", L"Copying files");
-
-    SetProgressText(L"Installing fonts...");
-    if (!InstallFonts()) return FailOperation(L"Installation", L"Installing fonts");
-
-    SetProgressText(L"Installing programs...");
-    if (!InstallPrograms()) return FailOperation(L"Installation", L"Installing programs");
-
+    // Rectify11 v4 Alpha is the required base. Rectify12 deliberately does not run
+    // the inherited Rectify11 v3 payload extraction/copy/font/program/registry stages.
+    // Rectify12-owned system patch stages are inserted here as they are migrated away
+    // from the old Windhawk prototypes.
     SetProgressText(L"Updating device drivers...");
     if (!Rectify12::Drivers::UpdateFromWindowsUpdate()) {
         return FailOperation(L"Installation", L"Updating device drivers");
     }
-
-    SetProgressText(L"Applying Rectify12 tweaks...");
-    if (!RegisterRectifyTweaks()) return FailOperation(L"Installation", L"Applying Rectify12 tweaks");
 
     SetProgressText(L"Installing Rectify12 cursors...");
     if (!Rectify12::Cursors::Install(InstallFlags[L"LIGHTTHEME"])) {
