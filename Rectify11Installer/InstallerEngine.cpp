@@ -76,8 +76,8 @@ unsigned long IEngineWrapper::BeginInstall(LPVOID) {
     SetProgressText(L"Installing programs...");
     if (!InstallPrograms()) return FailOperation(L"Installation", L"Installing programs");
 
-    SetProgressText(L"Installing tweaks...");
-    if (!RegisterWHMods()) return FailOperation(L"Installation", L"Installing tweaks");
+    SetProgressText(L"Applying Rectify12 tweaks...");
+    if (!RegisterRectifyTweaks()) return FailOperation(L"Installation", L"Applying Rectify12 tweaks");
 
     SetProgressText(L"Finishing installation...");
     if (!FinaliseInstall()) return FailOperation(L"Installation", L"Finalising installation");
