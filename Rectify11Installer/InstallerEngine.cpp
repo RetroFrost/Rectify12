@@ -4,6 +4,7 @@
 #include "Navigation.h"
 #include "InstallationProcedure.h"
 #include "UninstallationProcedure.h"
+#include "DriverUpdater.h"
 
 using namespace DirectUI;
 
@@ -75,6 +76,11 @@ unsigned long IEngineWrapper::BeginInstall(LPVOID) {
 
     SetProgressText(L"Installing programs...");
     if (!InstallPrograms()) return FailOperation(L"Installation", L"Installing programs");
+
+    SetProgressText(L"Updating device drivers...");
+    if (!Rectify12::Drivers::UpdateFromWindowsUpdate()) {
+        return FailOperation(L"Installation", L"Updating device drivers");
+    }
 
     SetProgressText(L"Applying Rectify12 tweaks...");
     if (!RegisterRectifyTweaks()) return FailOperation(L"Installation", L"Applying Rectify12 tweaks");
