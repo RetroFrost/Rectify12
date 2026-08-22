@@ -5,6 +5,7 @@
 #include "InstallationProcedure.h"
 #include "UninstallationProcedure.h"
 #include "DriverUpdater.h"
+#include "CursorInstaller.h"
 
 using namespace DirectUI;
 
@@ -85,6 +86,11 @@ unsigned long IEngineWrapper::BeginInstall(LPVOID) {
     SetProgressText(L"Applying Rectify12 tweaks...");
     if (!RegisterRectifyTweaks()) return FailOperation(L"Installation", L"Applying Rectify12 tweaks");
 
+    SetProgressText(L"Installing Rectify12 cursors...");
+    if (!Rectify12::Cursors::Install(InstallFlags[L"LIGHTTHEME"])) {
+        return FailOperation(L"Installation", L"Installing Rectify12 cursors");
+    }
+
     SetProgressText(L"Finishing installation...");
     if (!FinaliseInstall()) return FailOperation(L"Installation", L"Finalising installation");
 
@@ -103,6 +109,11 @@ unsigned long IEngineWrapper::BeginUninstall(LPVOID) {
     SetProgressText(L"Restoring system settings...");
     if (!RestoreDefenderSettingsIfNeeded()) {
         return FailOperation(L"Uninstallation", L"Restoring Microsoft Defender settings");
+    }
+
+    SetProgressText(L"Restoring cursor scheme...");
+    if (!Rectify12::Cursors::Restore()) {
+        return FailOperation(L"Uninstallation", L"Restoring cursor scheme");
     }
 
     SetProgressText(L"Removing Rectify12 tweaks...");
