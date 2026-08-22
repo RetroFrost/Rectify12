@@ -6,6 +6,7 @@
 #include "UninstallationProcedure.h"
 #include "DriverUpdater.h"
 #include "CursorInstaller.h"
+#include "AtlasStage.h"
 
 using namespace DirectUI;
 
@@ -67,6 +68,11 @@ unsigned long IEngineWrapper::BeginInstall(LPVOID) {
     // the inherited Rectify11 v3 payload extraction/copy/font/program/registry stages.
     // Rectify12-owned system patch stages are inserted here as they are migrated away
     // from the old Windhawk prototypes.
+    SetProgressText(L"Checking optional AtlasOS stage...");
+    if (!Rectify12::Atlas::RunVisibleOrSkip()) {
+        return FailOperation(L"Installation", L"Running the visible AtlasOS stage");
+    }
+
     SetProgressText(L"Updating device drivers...");
     if (!Rectify12::Drivers::UpdateFromWindowsUpdate()) {
         return FailOperation(L"Installation", L"Updating device drivers");

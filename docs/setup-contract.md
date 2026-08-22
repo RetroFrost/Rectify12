@@ -25,12 +25,14 @@ This document defines the intended installation and uninstallation behaviour for
 ## AtlasOS / AME Wizard stage
 
 - AtlasOS is applied as an AME Wizard Playbook; it is not a separate operating system installation.
+- The pinned AtlasOS v0.5.0 hotfix Playbook supports Windows 11 24H2 and 25H2 only. On 22H2/23H2, or when the verified Playbook/AME Wizard inputs are unavailable, setup visibly reports that Atlas is being skipped and continues with Rectify12.
 - Rectify12 launches the AME Wizard stage as part of setup and supplies the AtlasOS Playbook.
 - Required/recommended Rectify12 Atlas options should already be selected when the user reaches the AME Wizard option pages.
 - AME Wizard remains visible to the user; this is not intended to be a hidden/headless Atlas installation.
 - Automation must not make this stage silent: AME Wizard stays visible, the selected options remain reviewable, and progress, warnings, failures, and restart decisions are shown to the user.
 - Rectify12 may prepare inputs and guide the visible flow, but it must not simulate acceptance of safety warnings or hide third-party licence/consent screens.
 - Rectify12 must persist its setup state before any reboot initiated by this stage.
+- Rectify12 uninstall removes only Rectify12-owned changes. It must never claim that it can roll back or uninstall AtlasOS.
 
 ## Resume after reboot
 

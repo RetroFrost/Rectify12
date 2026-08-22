@@ -13,7 +13,7 @@ Rectify12 must not be labelled final solely because the foundation projects comp
 
 ## Blocking final-release gates
 
-- Integrate a pinned AtlasOS Playbook and compatible AME Wizard build. AME Wizard must stay visible; prepared options, progress, warnings, failures, consent, and restart decisions must remain visible to the user.
+- Supply the redistributable AME Wizard binary through an approved release channel. The installer now recognises the pinned AtlasOS v0.5.0 hotfix Playbook, verifies its official SHA-256, runs an available wizard visibly, and visibly skips Atlas when compatible inputs are unavailable.
 - Wire the versioned setup state machine into the installer entry point and prove reboot continuation, retry, and cleanup behavior.
 - Replace the remaining prototype modules with a version-aware direct system-patch engine. Every modified system component needs a pre-change backup, ownership record, validation, and tested rollback.
 - Remove or rename inherited Rectify11 v3 payload paths and UI text that can misidentify Rectify12.
