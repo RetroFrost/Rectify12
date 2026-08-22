@@ -11,7 +11,6 @@ wchar_t path[MAX_PATH];
 wchar_t cmd[1024];
 
 std::wstring copy_list[] = {
-L"%r11files%\\Mods|%ProgramData%\\Windhawk\\Engine\\Mods|NONE",
 L"%r11files%\\Rectify11|%systemroot%\\Rectify12|INSTALLICONS",
 L"%r11files%\\System32|%systemroot%\\System32|NONE",
 L"%r11files%\\themes|%systemroot%\\resources\\themes|INSTALLTHEMES",
@@ -22,23 +21,12 @@ L"%r11files%\\media|%systemroot%\\media\\rectified|INSTALLTHEMES",
 
 std::wstring install_list[] = {
 L"msiexec.exe /i \"%r11files%\\SecureUxTheme_x64.msi\" /quiet /norestart|INSTALLTHEMES|AMD64",
-L"msiexec.exe /i \"%r11files%\\SecureUxTheme_ARM64.msi\" /quiet /norestart|INSTALLTHEMES|ARM64",
-L"\"%r11files%\\windhawk_setup_offline.exe\" /S|NONE",
-L"\"%r11files%\\SymChk\\symchk.exe\" \"%systemroot%\\Explorer.exe\" /s SRV*%programdata%\\Windhawk\\Engine\\symbols\\*http://msdl.microsoft.com/download/symbols|NONE",
-L"\"%r11files%\\SymChk\\symchk.exe\" \"%systemroot%\\system32\\Shlwapi.dll\" /s SRV*%programdata%\\Windhawk\\Engine\\symbols\\*http://msdl.microsoft.com/download/symbols|NONE"
+L"msiexec.exe /i \"%r11files%\\SecureUxTheme_ARM64.msi\" /quiet /norestart|INSTALLTHEMES|ARM64"
 };
 
-std::wstring mod_list[] = {
-L"%r11files%\\Regs\\resourcepatch.reg|INSTALLICONS|AMD64",
-L"%r11files%\\Regs\\resourcepatchARM.reg|INSTALLICONS|ARM64",
-L"%r11files%\\Regs\\soundWH.reg|INSTALLTHEMES|AMD64",
-L"%r11files%\\Regs\\soundWHARM.reg|INSTALLTHEMES|ARM64",
-L"%r11files%\\Regs\\winvershutdown.reg|INSTALLWINVERSHUTDOWN|AMD64",
-L"%r11files%\\Regs\\winvershutdownARM.reg|INSTALLWINVERSHUTDOWN|ARM64",
-L"%r11files%\\Regs\\titlebarfix.reg|INSTALLTHEMES|AMD64",
-L"%r11files%\\Regs\\titlebarfixARM.reg|INSTALLTHEMES|ARM64",
-L"%r11files%\\Regs\\topbar.reg|INSTALLEXP|AMD64",
-L"%r11files%\\Regs\\topbarARM.reg|INSTALLEXP|ARM64",
+// These are ordinary Rectify/Windows registry tweaks. Windhawk-specific module
+// registration is deliberately excluded: Rectify12 owns its system-patching path.
+std::wstring registry_list[] = {
 L"%r11files%\\Regs\\Light.reg|LIGHTTHEME",
 L"%r11files%\\Regs\\Dark.reg|DARKTHEME",
 L"%r11files%\\Regs\\sound.reg|INSTALLTHEMES",
@@ -299,9 +287,9 @@ bool InstallFonts() {
     return success;
 }
 
-bool RegisterWHMods() {
-    InstallationLogger.WriteLine(L"Registering Windhawk modules and registry files...");
-    for (const auto& entry : mod_list) {
+bool RegisterRectifyTweaks() {
+    InstallationLogger.WriteLine(L"Registering Rectify12 registry tweaks...");
+    for (const auto& entry : registry_list) {
         std::vector<std::wstring> fields = ParseDelimiterString(entry);
         if (fields.size() < 2) {
             InstallationLogger.WriteLine(L"Invalid registry-list entry: " + entry);
