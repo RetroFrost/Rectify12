@@ -24,7 +24,7 @@ jobs:
         shell: pwsh
         run: msbuild Rectify11Installer.sln /m /p:Configuration=Release /p:Platform=x64
 
-      - name: Collect binaries
+      - name: Collect Rectify12 package
         if: success()
         shell: pwsh
         run: |
@@ -33,7 +33,15 @@ jobs:
             Copy-Item $_.FullName -Destination artifacts -Force
           }
 
-      - name: Upload binaries
+          Copy-Item assets/cursors/Rectify12-cursors-jepricreations.zip artifacts/Rectify12-cursors-jepricreations.zip -Force
+          Copy-Item docs/setup-contract.md artifacts/setup-contract.md -Force
+
+          $cursorHash = (Get-FileHash artifacts/Rectify12-cursors-jepricreations.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($cursorHash -ne '87f9970f88ffa26bfd096f3fdb6691619a12e9fd0ae8183b89cb2fe04998799d') {
+            throw "Cursor asset hash mismatch: $cursorHash"
+          }
+
+      - name: Upload Rectify12 package
         if: success()
         uses: actions/upload-artifact@v4
         with:
