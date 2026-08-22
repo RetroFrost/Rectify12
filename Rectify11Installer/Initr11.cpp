@@ -50,8 +50,9 @@ namespace {
     }
 
     bool IsSupportedRectify12Build(DWORD build) {
-        // Windows 11 24H2 = 26100.x; Windows 11 25H2 = 26200.x.
-        return build == 26100 || build == 26200;
+        // Windows 11 22H2 = 22621.x; 23H2 = 22631.x;
+        // 24H2 = 26100.x; 25H2 = 26200.x.
+        return build == 22621 || build == 22631 || build == 26100 || build == 26200;
     }
 
     bool HasRectify11V4Alpha(std::wstring& detectedVersion) {
@@ -138,7 +139,8 @@ namespace {
         DWORD build = 0;
         if (!GetCurrentWindowsBuild(build) || !IsSupportedRectify12Build(build)) {
             const std::wstring detail =
-                L"Rectify12 currently supports Windows 11 24H2 (build 26100) and 25H2 (build 26200) only.\n\n"
+                L"Rectify12 currently supports Windows 11 22H2 (build 22621), 23H2 (build 22631), "
+                L"24H2 (build 26100), and 25H2 (build 26200).\n\n"
                 L"Detected build: " + (build ? std::to_wstring(build) : std::wstring(L"unknown"));
             TaskDialog(
                 nullptr,

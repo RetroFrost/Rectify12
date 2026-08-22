@@ -4,8 +4,9 @@ This document defines the intended installation and uninstallation behaviour for
 
 ## Supported Windows releases
 
-- Rectify12 currently supports Windows 11 24H2 (build 26100) and Windows 11 25H2 (build 26200) only.
-- Installation must stop before any system modification when the current base build is outside that set.
+- Rectify12 accepts Windows 11 22H2 (build 22621), 23H2 (build 22631), 24H2 (build 26100), and 25H2 (build 26200).
+- 22H2 and 23H2 are foundation/experimental targets until their direct-patch and rollback paths have completed dedicated runtime testing; 24H2 and 25H2 remain the primary targets.
+- Installation must stop before any system modification when the current base build is outside the explicit set above. Future/unknown builds are not accepted automatically.
 - Uninstallation must remain available even if Windows has subsequently moved to another build, so users can recover/remove Rectify12 after an OS upgrade.
 
 ## Required base
