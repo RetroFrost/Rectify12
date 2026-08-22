@@ -11,6 +11,7 @@
 #include "Navigation.h"
 #include "InstallerEngine.h"
 #include "InstallationProcedure.h"
+#include "SetupState.h"
 #include "Logger.h"
 #include "MiscWindow.h"
 #include "EffectsEngine.h"
@@ -307,6 +308,7 @@ LRESULT CALLBACK SubclassWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
+    const bool resumeRequested = Rectify12::SetupState::IsResumeCommandLine(lpCmdLine);
     InstallFlags[L"NONE"] = true;
     InstallFlags[L"INSTALLICONS"] = true;
     InstallFlags[L"INSTALLTHEMES"] = true;
@@ -467,6 +469,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Navigate();
 
     pwnd->ShowWindow(SW_SHOW);
+
+    if (resumeRequested && !uninstall) {
+        Rectify12::SetupState::Stage resumeStage = Rectify12::SetupState::Stage::None;
+        if (!Rectify12::SetupState::LoadStage(resumeStage)) {
+            TaskDialog(pwnd->GetHWND(), nullptr, L"Rectify12 setup", L"Setup cannot resume",
+                L"The saved setup state is missing or incompatible. Start Rectify12 again from the original package.",
+                TDCBF_OK_BUTTON, TD_ERROR_ICON, nullptr);
+            Rectify12::SetupState::ClearRunOnce();
+            return HRESULT_FROM_WIN32(ERROR_INVALID_DATA);
+        }
+
+        TaskDialog(pwnd->GetHWND(), nullptr, L"Rectify12 setup", L"Continuing setup after restart",
+            L"Windows has restarted. Rectify12 will now continue visibly from the last saved stage.",
+            TDCBF_OK_BUTTON, TD_INFORMATION_ICON, nullptr);
+        nxt = PROGRESSPAGE;
+        Navigate();
+    }
 
     StartMessagePump();
     UnInitProcessPriv(NULL);

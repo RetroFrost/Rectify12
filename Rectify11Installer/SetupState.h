@@ -201,6 +201,7 @@ namespace Rectify12::SetupState {
             L"Base.dll",
             L"Controls.dll",
             L"PageRes.dll",
+            L"Rectify12-cursors-jepricreations.zip",
         };
         for (const auto* filename : requiredRuntimeFiles) {
             if (!CopyIfPresent(sourceDirectory / filename, directory / filename, true)) return false;
@@ -208,6 +209,12 @@ namespace Rectify12::SetupState {
 
         // The installer font is desirable but not a reason to lose resume capability.
         CopyIfPresent(sourceDirectory / L"Segoe_r11.ttf", directory / L"Segoe_r11.ttf", false);
+
+        // Atlas is optional. Preserve its verified inputs across a wizard-requested
+        // reboot when they were supplied with the original package.
+        CopyIfPresent(sourceDirectory / L"AME Wizard Beta.exe", directory / L"AME Wizard Beta.exe", false);
+        CopyIfPresent(sourceDirectory / L"AtlasPlaybook_v0.5.0-hotfix.apbx",
+            directory / L"AtlasPlaybook_v0.5.0-hotfix.apbx", false);
 
         stagedExecutable = targetExecutable.wstring();
         return true;
@@ -223,4 +230,5 @@ namespace Rectify12::SetupState {
         }
         return true;
     }
+
 }

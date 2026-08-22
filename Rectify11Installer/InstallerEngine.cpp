@@ -7,6 +7,7 @@
 #include "DriverUpdater.h"
 #include "CursorInstaller.h"
 #include "AtlasStage.h"
+#include "SetupState.h"
 
 using namespace DirectUI;
 
@@ -34,6 +35,10 @@ namespace {
 
         const std::wstring progress = operationName + L" failed. Review Installation.log before retrying.";
         SetProgressText(progress.c_str());
+
+        // Do not create an endless sign-in retry loop after an actionable failure.
+        // The versioned stage record remains available for a deliberate retry.
+        Rectify12::SetupState::ClearRunOnce();
 
         IEngineWrapper::operationRunning.store(false);
         if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPFAILED, 0, 0);
@@ -64,27 +69,64 @@ unsigned long IEngineWrapper::BeginInstall(LPVOID) {
         return ERROR_BUSY;
     }
 
+    Rectify12::SetupState::Stage savedStage = Rectify12::SetupState::Stage::None;
+    const bool resuming = Rectify12::SetupState::LoadStage(savedStage);
+
     // Rectify11 v4 Alpha is the required base. Rectify12 deliberately does not run
     // the inherited Rectify11 v3 payload extraction/copy/font/program/registry stages.
     // Rectify12-owned system patch stages are inserted here as they are migrated away
     // from the old Windhawk prototypes.
-    SetProgressText(L"Checking optional AtlasOS stage...");
-    if (!Rectify12::Atlas::RunVisibleOrSkip()) {
-        return FailOperation(L"Installation", L"Running the visible AtlasOS stage");
+    if (!resuming) {
+        SetProgressText(L"Preparing safe restart continuation...");
+        if (!Rectify12::SetupState::Arm(Rectify12::SetupState::Stage::AwaitingAtlas)) {
+            return FailOperation(L"Installation", L"Preparing restart continuation");
+        }
+        savedStage = Rectify12::SetupState::Stage::AwaitingAtlas;
     }
 
-    SetProgressText(L"Updating device drivers...");
-    if (!Rectify12::Drivers::UpdateFromWindowsUpdate()) {
-        return FailOperation(L"Installation", L"Updating device drivers");
+    if (savedStage == Rectify12::SetupState::Stage::AwaitingAtlas) {
+        if (!Rectify12::SetupState::SaveStage(Rectify12::SetupState::Stage::AtlasRunning)) {
+            return FailOperation(L"Installation", L"Saving the Atlas stage state");
+        }
+        SetProgressText(L"Checking optional AtlasOS stage...");
+        if (!Rectify12::Atlas::RunVisibleOrSkip()) {
+            return FailOperation(L"Installation", L"Running the visible AtlasOS stage");
+        }
+        if (!Rectify12::SetupState::SaveStage(Rectify12::SetupState::Stage::PostAtlas)) {
+            return FailOperation(L"Installation", L"Saving the post-Atlas state");
+        }
+        savedStage = Rectify12::SetupState::Stage::PostAtlas;
+    }
+    else if (savedStage == Rectify12::SetupState::Stage::AtlasRunning) {
+        InstallationLogger.WriteLine(L"Setup resumed after the visible Atlas stage; continuing with Rectify12-owned stages.");
+        if (!Rectify12::SetupState::SaveStage(Rectify12::SetupState::Stage::PostAtlas)) {
+            return FailOperation(L"Installation", L"Saving resumed setup state");
+        }
+        savedStage = Rectify12::SetupState::Stage::PostAtlas;
     }
 
-    SetProgressText(L"Installing Rectify12 cursors...");
-    if (!Rectify12::Cursors::Install(InstallFlags[L"LIGHTTHEME"])) {
-        return FailOperation(L"Installation", L"Installing Rectify12 cursors");
+    if (savedStage == Rectify12::SetupState::Stage::PostAtlas) {
+        SetProgressText(L"Updating device drivers...");
+        if (!Rectify12::Drivers::UpdateFromWindowsUpdate()) {
+            return FailOperation(L"Installation", L"Updating device drivers");
+        }
+
+        SetProgressText(L"Installing Rectify12 cursors...");
+        if (!Rectify12::Cursors::Install(InstallFlags[L"LIGHTTHEME"])) {
+            return FailOperation(L"Installation", L"Installing Rectify12 cursors");
+        }
+        if (!Rectify12::SetupState::SaveStage(Rectify12::SetupState::Stage::ApplyingRectify)) {
+            return FailOperation(L"Installation", L"Saving Rectify12 application state");
+        }
     }
 
     SetProgressText(L"Finishing installation...");
     if (!FinaliseInstall()) return FailOperation(L"Installation", L"Finalising installation");
+
+    if (!Rectify12::SetupState::SaveStage(Rectify12::SetupState::Stage::Complete) ||
+        !Rectify12::SetupState::Clear()) {
+        return FailOperation(L"Installation", L"Cleaning restart continuation state");
+    }
 
     operationRunning.store(false);
     if (pwnd) PostMessageW(pwnd->GetHWND(), WM_SETUPCOMPLETE, 0, 0);

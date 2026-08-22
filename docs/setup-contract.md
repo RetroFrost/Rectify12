@@ -39,6 +39,8 @@ This document defines the intended installation and uninstallation behaviour for
 - Setup is multi-stage and must continue automatically after Windows starts again.
 - The resume mechanism must store a versioned setup-state record, register a one-shot continuation entry, and remove that entry once the resumed stage starts successfully.
 - A failed or interrupted stage must not silently advance the state machine.
+- Resume is visible: Rectify12 displays a continuation notice, opens its progress screen, and reports the stage it is running. Automation does not hide the installer.
+- The staged resume host includes the exact checksum-pinned cursor archive and any locally supplied Atlas inputs needed after a restart.
 
 ## System patching
 

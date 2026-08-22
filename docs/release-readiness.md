@@ -10,11 +10,12 @@ Rectify12 must not be labelled final solely because the foundation projects comp
 - Windows Update is used for applicable driver updates and failures stop installation.
 - Windhawk install/uninstall ownership has been removed from the installer path.
 - Installer failures stop the stage instead of silently advancing.
+- The versioned setup state is wired into installation: the installer stages its visible resume host and required cursor payload, records Atlas progress, resumes automatically after Windows starts, and removes the one-shot continuation after success or an actionable failure.
 
 ## Blocking final-release gates
 
 - Supply the redistributable AME Wizard binary through an approved release channel. The installer now recognises the pinned AtlasOS v0.5.0 hotfix Playbook, verifies its official SHA-256, runs an available wizard visibly, and visibly skips Atlas when compatible inputs are unavailable.
-- Wire the versioned setup state machine into the installer entry point and prove reboot continuation, retry, and cleanup behavior.
+- Prove reboot continuation, retry, and cleanup behavior on the supported disposable-VM matrix, including an AME Wizard-initiated restart.
 - Replace the remaining prototype modules with a version-aware direct system-patch engine. Every modified system component needs a pre-change backup, ownership record, validation, and tested rollback.
 - Remove or rename inherited Rectify11 v3 payload paths and UI text that can misidentify Rectify12.
 - Sign the installer, control panel, Settings package, and release metadata with the project release certificate.
