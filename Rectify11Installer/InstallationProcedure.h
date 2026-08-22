@@ -13,7 +13,7 @@ struct ProcessResult {
 bool extractFiles();
 bool MoveFilesToTarget();
 bool InstallPrograms();
-bool RegisterWHMods();
+bool RegisterRectifyTweaks();
 void SetupComplete();
 bool InstallFonts();
 ProcessResult RunEXE(const wchar_t* exe, wchar_t* args, DWORD timeoutMilliseconds = 300000);
