@@ -29,17 +29,25 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path artifacts | Out-Null
-          Get-ChildItem -Recurse -File -Include Rectify12Installer.exe,Rectify12ControlPanel.exe,Base.dll,Controls.dll,PageRes.dll | ForEach-Object {
+          Get-ChildItem -Recurse -File -Include Rectify12Installer.exe,Rectify12ControlPanel.exe,Base.dll,Controls.dll,PageRes.dll,segoe_r11.ttf | ForEach-Object {
             Copy-Item $_.FullName -Destination artifacts -Force
           }
 
           Copy-Item assets/cursors/Rectify12-cursors-jepricreations.zip artifacts/Rectify12-cursors-jepricreations.zip -Force
           Copy-Item docs/setup-contract.md artifacts/setup-contract.md -Force
 
-          $cursorHash = (Get-FileHash artifacts/Rectify12-cursors-jepricreations.zip -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($cursorHash -ne '87f9970f88ffa26bfd096f3fdb6691619a12e9fd0ae8183b89cb2fe04998799d') {
+          $cursorArchive = 'artifacts/Rectify12-cursors-jepricreations.zip'
+          $cursorHash = (Get-FileHash $cursorArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($cursorHash -ne 'accccc09185e33157e710bbe99f3f8e89edc32a726788f0235dc57e2510456ca') {
             throw "Cursor asset hash mismatch: $cursorHash"
           }
+
+          $cursorCheck = Join-Path $env:RUNNER_TEMP 'rectify12-cursor-check'
+          Expand-Archive -LiteralPath $cursorArchive -DestinationPath $cursorCheck -Force
+          if (-not (Test-Path (Join-Path $cursorCheck 'light/Install.inf'))) { throw 'Light cursor Install.inf is missing' }
+          if (-not (Test-Path (Join-Path $cursorCheck 'dark/Install.inf'))) { throw 'Dark cursor Install.inf is missing' }
+          if (-not (Select-String -LiteralPath (Join-Path $cursorCheck 'light/Install.inf') -Pattern 'W11 Cursor Light Free by Jepri Creations' -Quiet)) { throw 'Unexpected light cursor scheme' }
+          if (-not (Select-String -LiteralPath (Join-Path $cursorCheck 'dark/Install.inf') -Pattern 'W11 Cursor Dark Free by Jepri Creations' -Quiet)) { throw 'Unexpected dark cursor scheme' }
 
       - name: Upload Rectify12 package
         if: success()
