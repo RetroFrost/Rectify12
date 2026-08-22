@@ -274,6 +274,9 @@
     <None Include="Rectify11\7z.exe">
       <Filter>Resource Files\Rectify11</Filter>
     </None>
+    <None Include="..\assets\cursors\Rectify12-cursors-jepricreations.zip">
+      <Filter>Resource Files\Rectify11</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="segoe_r11.ttf">

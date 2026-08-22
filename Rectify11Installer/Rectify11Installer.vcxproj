@@ -70,6 +70,7 @@
     <None Include="PageRes.dll"><DeploymentContent>true</DeploymentContent></None>
     <None Include="Rectify11\7z.dll"><DeploymentContent>true</DeploymentContent></None>
     <None Include="Rectify11\7z.exe"><DeploymentContent>true</DeploymentContent></None>
+    <None Include="..\assets\cursors\Rectify12-cursors-jepricreations.zip"><DeploymentContent>true</DeploymentContent></None>
     <None Include="Rectify11\Files.7z" Condition="Exists('Rectify11\Files.7z')">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>

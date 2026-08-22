@@ -52,12 +52,13 @@ This document defines the intended installation and uninstallation behaviour for
 
 The canonical cursor asset supplied for Rectify12 is:
 
-- Archive: `windows_11_cursors_concept_by_jepricreations_densjkc.zip`
+- Bundled archive: `assets/cursors/Rectify12-cursors-jepricreations.zip`
+- Original upload name: `windows_11_cursors_concept_by_jepricreations_densjkc.zip`
 - SHA-256: `04c9a4797f02ab88fd5df15a9377a32b3f66497f05caf89460f3441968a7024c`
 - Author/provider: JepriCreations
 - Included schemes: `W11 Cursor Light Free by Jepri Creations` and `W11 Cursor Dark Free by Jepri Creations`
 
-Rectify12 must verify the archive checksum before using a downloaded copy. The cursor pack's included licence/usage note requires clear credit to JepriCreations and a link to the author's DeviantArt page when redistributed.
+The foundation build verifies this checksum before compiling and includes the exact archive in its artifact. Any later installer extraction/application stage must verify the same checksum before using the pack. The cursor pack's included licence/usage note requires clear credit to JepriCreations and a link to the author's DeviantArt page when redistributed.
 
 Rectify12 should apply the light or dark cursor scheme to match the selected/current Windows app theme and preserve the previous cursor scheme for rollback.
 

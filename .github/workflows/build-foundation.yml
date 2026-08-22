@@ -20,6 +20,16 @@ jobs:
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Verify bundled cursor pack
+        shell: pwsh
+        run: |
+          $cursorPack = 'assets/cursors/Rectify12-cursors-jepricreations.zip'
+          $expectedHash = '04c9a4797f02ab88fd5df15a9377a32b3f66497f05caf89460f3441968a7024c'
+          $actualHash = (Get-FileHash -LiteralPath $cursorPack -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actualHash -ne $expectedHash) {
+            throw "Bundled cursor pack checksum mismatch. Expected $expectedHash, got $actualHash."
+          }
+
       - name: Build Release x64
         shell: pwsh
         run: msbuild Rectify11Installer.sln /m /p:Configuration=Release /p:Platform=x64
@@ -32,13 +42,12 @@ jobs:
           Get-ChildItem -Recurse -File -Include Rectify12Installer.exe,Rectify12ControlPanel.exe,Base.dll,Controls.dll,PageRes.dll,segoe_r11.ttf | ForEach-Object {
             Copy-Item $_.FullName -Destination artifacts -Force
           }
-
           Copy-Item assets/cursors/Rectify12-cursors-jepricreations.zip artifacts/Rectify12-cursors-jepricreations.zip -Force
           Copy-Item docs/setup-contract.md artifacts/setup-contract.md -Force
 
           $cursorArchive = 'artifacts/Rectify12-cursors-jepricreations.zip'
           $cursorHash = (Get-FileHash $cursorArchive -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($cursorHash -ne 'accccc09185e33157e710bbe99f3f8e89edc32a726788f0235dc57e2510456ca') {
+          if ($cursorHash -ne '04c9a4797f02ab88fd5df15a9377a32b3f66497f05caf89460f3441968a7024c') {
             throw "Cursor asset hash mismatch: $cursorHash"
           }
 
