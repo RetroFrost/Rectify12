@@ -99,9 +99,9 @@ unsigned long IEngineWrapper::BeginUninstall(LPVOID) {
         return FailOperation(L"Uninstallation", L"Restoring Microsoft Defender settings");
     }
 
-    SetProgressText(L"Removing Rectify12 modules...");
-    if (!RemoveWHMods()) {
-        return FailOperation(L"Uninstallation", L"Removing Rectify12 modules");
+    SetProgressText(L"Removing Rectify12 tweaks...");
+    if (!RemoveRectifyTweaks()) {
+        return FailOperation(L"Uninstallation", L"Removing Rectify12 tweaks");
     }
 
     RemoveSecureUX();
