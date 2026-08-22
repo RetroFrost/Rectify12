@@ -6,11 +6,11 @@
 				<Element width="250rp" direction="ltr" height="250rp" background="resbmp(1,7,-1,0,0,1,1,library(PageRes.dll))"/>
 			</Element>
 			<Element layout="borderlayout()" layoutpos="left">
-				<Richtext class="headertext" layoutpos="top" content="Welcome"/>
+				<Richtext class="headertext" layoutpos="top" content="Welcome to Rectify12"/>
 				<Richtext class="instructiontext" layoutpos="top"
-				content="Welcome to the Rectify12 Installation Wizard. Save your work and close other apps before continuing."/>
+				content="A calm, glass-first Windows experience inspired by the supplied concept video. Save your work and close other apps before continuing."/>
 				<Richtext class="instructiontext" layoutpos="top"
-				content="Rectify12 is being rebuilt around non-destructive resources, effects, and safer rollback. Click Next to continue or Exit to cancel."/>
+				content="Setup remains visible while it checks compatibility, prepares recovery, applies optional integrations, and installs Rectify12-owned components."/>
 				<Richtext class="instructiontext" foreground="rgb(236,64,78)" layoutpos="top"
 				content="Warning: Rectify12 is currently a development build. Test it on a disposable Windows installation or VM first."/>
 				<Element layout="borderlayout()" layoutpos="top">
@@ -22,3 +22,4 @@
 		</Element>
 	</Element>
 </duixml>
+
