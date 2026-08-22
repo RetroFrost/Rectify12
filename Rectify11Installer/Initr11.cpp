@@ -5,10 +5,196 @@
 #include "resource.h"
 #include "DirectUI/DirectUI.h"
 
+#include <cstdlib>
+#include <filesystem>
+#include <string>
+
 using namespace std;
 using namespace DirectUI;
 
 HRESULT err = 0;
+
+namespace {
+    constexpr wchar_t Rectify11UninstallKey[] =
+        L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Rectify11";
+
+    bool ReadRegistryString(HKEY root, const wchar_t* subkey, const wchar_t* valueName, std::wstring& value) {
+        DWORD bytes = 0;
+        LSTATUS status = RegGetValueW(root, subkey, valueName, RRF_RT_REG_SZ, nullptr, nullptr, &bytes);
+        if (status != ERROR_SUCCESS || bytes < sizeof(wchar_t)) return false;
+
+        std::wstring buffer(bytes / sizeof(wchar_t), L'\0');
+        status = RegGetValueW(root, subkey, valueName, RRF_RT_REG_SZ, nullptr, buffer.data(), &bytes);
+        if (status != ERROR_SUCCESS) return false;
+
+        if (!buffer.empty() && buffer.back() == L'\0') buffer.pop_back();
+        value = std::move(buffer);
+        return !value.empty();
+    }
+
+    bool GetCurrentWindowsBuild(DWORD& build) {
+        std::wstring buildText;
+        if (!ReadRegistryString(
+                HKEY_LOCAL_MACHINE,
+                L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+                L"CurrentBuildNumber",
+                buildText)) {
+            return false;
+        }
+
+        wchar_t* end = nullptr;
+        const unsigned long parsed = wcstoul(buildText.c_str(), &end, 10);
+        if (!end || end == buildText.c_str() || *end != L'\0') return false;
+        build = static_cast<DWORD>(parsed);
+        return true;
+    }
+
+    bool IsSupportedRectify12Build(DWORD build) {
+        // Windows 11 24H2 = 26100.x; Windows 11 25H2 = 26200.x.
+        return build == 26100 || build == 26200;
+    }
+
+    bool HasRectify11V4Alpha(std::wstring& detectedVersion) {
+        HKEY key = nullptr;
+        LSTATUS status = RegOpenKeyExW(
+            HKEY_LOCAL_MACHINE,
+            Rectify11UninstallKey,
+            0,
+            KEY_READ | KEY_WOW64_64KEY,
+            &key);
+        if (status != ERROR_SUCCESS) {
+            status = RegOpenKeyExW(HKEY_LOCAL_MACHINE, Rectify11UninstallKey, 0, KEY_READ, &key);
+        }
+        if (status != ERROR_SUCCESS) return false;
+
+        wchar_t version[128]{};
+        DWORD bytes = sizeof(version);
+        status = RegGetValueW(key, nullptr, L"DisplayVersion", RRF_RT_REG_SZ, nullptr, version, &bytes);
+        RegCloseKey(key);
+        if (status != ERROR_SUCCESS || version[0] == L'\0') return false;
+
+        detectedVersion.assign(version);
+        wchar_t* end = nullptr;
+        const unsigned long major = wcstoul(version, &end, 10);
+        return end != version && major >= 4;
+    }
+
+    bool RegistryKeyExists(HKEY root, const wchar_t* subkey) {
+        HKEY key = nullptr;
+        const LSTATUS status = RegOpenKeyExW(root, subkey, 0, KEY_READ, &key);
+        if (status == ERROR_SUCCESS) RegCloseKey(key);
+        return status == ERROR_SUCCESS;
+    }
+
+    bool FindConflictingPatchedSystem(std::wstring& conflict) {
+        // Use high-confidence markers only. Rectify11 is intentionally not checked here:
+        // it is the required Rectify12 base and is explicitly allowed.
+        if (RegistryKeyExists(HKEY_LOCAL_MACHINE, L"SOFTWARE\\AtlasOS")) {
+            conflict = L"AtlasOS";
+            return true;
+        }
+
+        wchar_t windowsDirectory[MAX_PATH]{};
+        if (GetWindowsDirectoryW(windowsDirectory, ARRAYSIZE(windowsDirectory)) != 0) {
+            std::filesystem::path atlasModules = std::filesystem::path(windowsDirectory) / L"AtlasModules";
+            std::error_code ec;
+            if (std::filesystem::exists(atlasModules, ec) && !ec) {
+                conflict = L"AtlasOS";
+                return true;
+            }
+        }
+
+        wchar_t programFiles[MAX_PATH]{};
+        if (ExpandEnvironmentStringsW(L"%ProgramFiles%", programFiles, ARRAYSIZE(programFiles)) != 0) {
+            std::filesystem::path revisionTool =
+                std::filesystem::path(programFiles) / L"Revision Tool" / L"revitool.exe";
+            std::error_code ec;
+            if (std::filesystem::exists(revisionTool, ec) && !ec) {
+                conflict = L"ReviOS / Revision Tool";
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool ConfirmSystemPatchWarning() {
+        int pressed = 0;
+        const HRESULT result = TaskDialog(
+            nullptr,
+            nullptr,
+            L"Rectify12",
+            L"Back up your data before continuing",
+            L"Rectify12 will apply an AtlasOS Playbook and patch Windows system components directly. "
+            L"These changes can require restarts and may make an unsupported or interrupted Windows installation unbootable.\n\n"
+            L"Save important files somewhere safe before continuing. Continue with Rectify12 setup?",
+            TDCBF_YES_BUTTON | TDCBF_NO_BUTTON,
+            TD_WARNING_ICON,
+            &pressed);
+        return SUCCEEDED(result) && pressed == IDYES;
+    }
+
+    int RunRectify12Preflight() {
+        DWORD build = 0;
+        if (!GetCurrentWindowsBuild(build) || !IsSupportedRectify12Build(build)) {
+            const std::wstring detail =
+                L"Rectify12 currently supports Windows 11 24H2 (build 26100) and 25H2 (build 26200) only.\n\n"
+                L"Detected build: " + (build ? std::to_wstring(build) : std::wstring(L"unknown"));
+            TaskDialog(
+                nullptr,
+                nullptr,
+                L"Rectify12",
+                L"Unsupported Windows version",
+                detail.c_str(),
+                TDCBF_OK_BUTTON,
+                TD_ERROR_ICON,
+                nullptr);
+            MainLogger.WriteLine(L"Rectify12 preflight rejected Windows build " + std::to_wstring(build) + L".", -26100);
+            return -26100;
+        }
+
+        std::wstring rectify11Version;
+        if (!HasRectify11V4Alpha(rectify11Version)) {
+            TaskDialog(
+                nullptr,
+                nullptr,
+                L"Rectify12",
+                L"Rectify11 v4 Alpha is required",
+                L"Install Rectify11 v4 Alpha before running Rectify12. Rectify12 is designed to patch an existing Rectify11 v4 installation and will not continue without it.",
+                TDCBF_OK_BUTTON,
+                TD_ERROR_ICON,
+                nullptr);
+            MainLogger.WriteLine(L"Rectify12 preflight could not confirm a Rectify11 v4 prerequisite.", -4000);
+            return -4000;
+        }
+        MainLogger.WriteLine(L"Detected Rectify11 prerequisite version " + rectify11Version + L".");
+
+        std::wstring conflict;
+        if (FindConflictingPatchedSystem(conflict)) {
+            const std::wstring detail =
+                L"Rectify12 detected an existing patched Windows environment: " + conflict +
+                L".\n\nRemove that system modification and return Windows to the Rectify11 v4 base before running Rectify12.";
+            TaskDialog(
+                nullptr,
+                nullptr,
+                L"Rectify12",
+                L"Conflicting system modification detected",
+                detail.c_str(),
+                TDCBF_OK_BUTTON,
+                TD_ERROR_ICON,
+                nullptr);
+            MainLogger.WriteLine(L"Rectify12 preflight detected conflicting system modification: " + conflict, -4090);
+            return -4090;
+        }
+
+        if (!ConfirmSystemPatchWarning()) {
+            MainLogger.WriteLine(L"Rectify12 installation was cancelled at the system-patch backup warning.", ERROR_CANCELLED);
+            return ERROR_CANCELLED;
+        }
+
+        return ERROR_SUCCESS;
+    }
+}
 
 bool CheckVer(int build) {
     OSVERSIONINFOEXA vInfo{};
@@ -179,12 +365,8 @@ int ChangeSheet() {
 }
 
 int InitInstaller() {
-    if (!CheckVer(21343)) {
-        err = -21343;
-        TaskDialog(NULL, NULL, L"Rectify12", L"Unsupported Windows version", L"Windows 10 build 21343 or newer is required.", TDCBF_OK_BUTTON, TD_ERROR_ICON, NULL);
-        MainLogger.WriteLine(L"This Windows Build is not supported. Windows 10 Build 21343 and above is required.", err);
-        return err;
-    }
+    err = RunRectify12Preflight();
+    if (err != ERROR_SUCCESS) return err;
 
     // Don't equate reachability of one website with system connectivity. Local
     // payload steps can still succeed behind proxies/firewalls, while individual
