@@ -9,7 +9,7 @@
 
 namespace Rectify12::Cursors {
     inline constexpr wchar_t BackupKey[] = L"Software\\Rectify12\\CursorBackup";
-    inline constexpr wchar_t ExpectedArchiveHash[] = L"87F9970F88FFA26BFD096F3FDB6691619A12E9FD0AE8183B89CB2FE04998799D";
+    inline constexpr wchar_t ExpectedArchiveHash[] = L"ACCCCC09185E33157E710BBE99F3F8E89EDC32A726788F0235DC57E2510456CA";
 
     struct CursorValue {
         const wchar_t* registryName;
@@ -175,7 +175,9 @@ namespace Rectify12::Cursors {
             L"$dest='" + extractedRoot.wstring() + L"';"
             L"if(Test-Path -LiteralPath $dest){Remove-Item -LiteralPath $dest -Recurse -Force};"
             L"New-Item -ItemType Directory -Force -Path $dest | Out-Null;"
-            L"Expand-Archive -LiteralPath $archive -DestinationPath $dest -Force;exit 0\"";
+            L"Expand-Archive -LiteralPath $archive -DestinationPath $dest -Force;"
+            L"if(-not (Test-Path -LiteralPath (Join-Path $dest 'light\\Install.inf')) -or -not (Test-Path -LiteralPath (Join-Path $dest 'dark\\Install.inf'))){throw 'Rectify12 cursor archive is incomplete'};"
+            L"exit 0\"";
 
         std::vector<wchar_t> mutableCommand(command.begin(), command.end());
         mutableCommand.push_back(L'\0');
@@ -286,7 +288,8 @@ namespace Rectify12::Cursors {
                 }
             }
             else {
-                const LSTATUS deleteResult = RegDeleteValueW(cursorKey, item.registryName);
+                const wchar_t* registryName = item.registryName ? item.registryName : L"";
+                const LSTATUS deleteResult = RegDeleteValueW(cursorKey, registryName);
                 if (deleteResult != ERROR_SUCCESS && deleteResult != ERROR_FILE_NOT_FOUND) {
                     success = false;
                     break;
