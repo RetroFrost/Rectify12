@@ -1,6 +1,6 @@
 #pragma once
 
 bool RestoreDefenderSettingsIfNeeded();
-bool RemoveWHMods();
+bool RemoveRectifyTweaks();
 void RemoveSecureUX();
 bool FinaliseUninstall();
