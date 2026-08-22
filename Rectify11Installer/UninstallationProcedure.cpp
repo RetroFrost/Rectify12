@@ -13,17 +13,6 @@
 namespace {
     constexpr wchar_t DefenderBackupKey[] = L"SOFTWARE\\Rectify12\\DefenderBackup";
 
-    bool DeleteTreeIfPresent(HKEY root, const wchar_t* subkey, const wchar_t* description) {
-        const LSTATUS result = RegDeleteTreeW(root, subkey);
-        if (result == ERROR_SUCCESS || result == ERROR_FILE_NOT_FOUND || result == ERROR_PATH_NOT_FOUND) {
-            return true;
-        }
-
-        InstallationLogger.WriteLine(
-            L"Could not remove " + std::wstring(description) + L". Win32 error: " + std::to_wstring(result));
-        return false;
-    }
-
     bool DeleteValueIfPresent(HKEY root, const wchar_t* subkey, const wchar_t* valueName, const wchar_t* description) {
         const LSTATUS result = RegDeleteKeyValueW(root, subkey, valueName);
         if (result == ERROR_SUCCESS || result == ERROR_FILE_NOT_FOUND || result == ERROR_PATH_NOT_FOUND) {
@@ -202,30 +191,10 @@ bool RestoreDefenderSettingsIfNeeded() {
     return true;
 }
 
-bool RemoveWHMods() {
+bool RemoveRectifyTweaks() {
+    // Rectify12 no longer owns or installs Windhawk modules, so uninstall must never
+    // delete Windhawk state that may belong to the user or another product.
     bool success = true;
-
-    if (InstallFlags[L"INSTALLTHEMES"]) {
-        InstallationLogger.WriteLine(L"Uninstalling sound hook...");
-        success = DeleteTreeIfPresent(
-            HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Windhawk\\Engine\\Mods\\logon-logoff-shutdown-sounds",
-            L"Rectify12 sound hook") && success;
-
-        InstallationLogger.WriteLine(L"Uninstalling titlebar fix...");
-        success = DeleteTreeIfPresent(
-            HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Windhawk\\Engine\\Mods\\local@titlebar-fix",
-            L"Rectify12 titlebar fix") && success;
-    }
-
-    if (InstallFlags[L"INSTALLICONS"]) {
-        InstallationLogger.WriteLine(L"Uninstalling resource redirect...");
-        success = DeleteTreeIfPresent(
-            HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Windhawk\\Engine\\Mods\\icon-resource-redirect",
-            L"Rectify12 icon resource redirect") && success;
-    }
 
     if (InstallFlags[L"INSTALLASDF"]) {
         InstallationLogger.WriteLine(L"Uninstalling Accent Colorizer startup entry...");
@@ -234,22 +203,6 @@ bool RemoveWHMods() {
             L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
             L"ASDF",
             L"Rectify12 Accent Colorizer startup entry") && success;
-    }
-
-    if (InstallFlags[L"INSTALLWINVERSHUTDOWN"]) {
-        InstallationLogger.WriteLine(L"Uninstalling winver and shutdown enhancements...");
-        success = DeleteTreeIfPresent(
-            HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Windhawk\\Engine\\Mods\\winvershutdown",
-            L"Rectify12 winver/shutdown module") && success;
-    }
-
-    if (InstallFlags[L"INSTALLEXP"]) {
-        InstallationLogger.WriteLine(L"Uninstalling Explorer tweaks...");
-        success = DeleteTreeIfPresent(
-            HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Windhawk\\Engine\\Mods\\windows-11-file-explorer-styler",
-            L"Rectify12 Explorer styler") && success;
     }
 
     return success;
