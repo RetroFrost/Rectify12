@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <!-- Publisher must match the signing certificate used by the Rectify12 installer. -->
+  <Identity Name="RetroFrost.Rectify12.Settings" Publisher="CN=RetroFrost" Version="0.1.0.0" />
+
+  <Properties>
+    <DisplayName>Rectify12 Settings</DisplayName>
+    <PublisherDisplayName>RetroFrost</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22621.0" MaxVersionTested="10.0.28000.0" />
+  </Dependencies>
+
+  <Applications>
+    <Application Id="Rectify12Settings" Executable="Rectify12Settings.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        AppListEntry="none"
+        DisplayName="Rectify12 Settings"
+        Description="Rectify12 configuration and modernised Windows settings"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+      </uap:VisualElements>
+
+      <Extensions>
+        <uap:Extension Category="windows.protocol" Executable="Rectify12Settings.exe" EntryPoint="Windows.FullTrustApplication">
+          <uap:Protocol Name="rectify12-settings" />
+        </uap:Extension>
+
+        <!--
+          Windows Settings partner integration. This restricted extension is suitable
+          for Rectify12's sideloaded system-customisation package. It registers links
+          and search terms in Settings without replacing SystemSettings.exe.
+        -->
+        <rescap:Extension Category="windows.settingsApp" Executable="Rectify12Settings.exe" EntryPoint="Windows.FullTrustApplication">
+          <rescap:SettingsApp SettingsPageUri="ms-settings:extras" Category="extras">
+            <rescap:AppLinks>
+              <rescap:Link AppActivationMode="rectify12-settings://appearance" DisplayName="Rectify12 appearance" />
+              <rescap:Link AppActivationMode="rectify12-settings://effects" DisplayName="Rectify12 effects" />
+              <rescap:Link AppActivationMode="rectify12-settings://explorer" DisplayName="Rectify12 File Manager and Explorer" />
+              <rescap:Link AppActivationMode="rectify12-settings://legacy" DisplayName="Modernised Windows settings" />
+              <rescap:Link AppActivationMode="rectify12-settings://recovery" DisplayName="Rectify12 recovery" />
+            </rescap:AppLinks>
+            <rescap:SearchTerms>
+              <rescap:Term>Rectify12</rescap:Term>
+              <rescap:Term>Explorer effects</rescap:Term>
+              <rescap:Term>full context menu</rescap:Term>
+              <rescap:Term>legacy Control Panel settings</rescap:Term>
+              <rescap:Term>restore Rectify12</rescap:Term>
+            </rescap:SearchTerms>
+          </rescap:SettingsApp>
+        </rescap:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

@@ -6,20 +6,20 @@
 				<Element class="PTImage" width="250rp" height="250rp"/>
 			</Element>
 			<Element layout="borderlayout()" layoutpos="left">
-				<Richtext class="headertext" layoutpos="top" content="Select Patching Mode"/>
-				<Richtext class="instructiontext" layoutpos="top" content="You can either patch your system, or patch a Windows 11 ISO file for a more complete experience."/>
+				<Richtext class="headertext" layoutpos="top" content="Select Installation Mode"/>
+				<Richtext class="instructiontext" layoutpos="top" content="Install Rectify12 on this Windows installation. Offline image servicing will be added after the live-system path is stable."/>
 				<Element layout="verticalflowlayout()" padding="rect(3rp,15rp,0,0)" layoutpos="top">
 					<TouchButton id="atom(PatchSystem)" class="CommandLink" layout="borderlayout()" margin="rect(0,0,0,5rp)">
 						<Richtext class="CommandLinkIcon" layoutpos="left" content="resstr(105)"/>
 						<Richtext class="CommandLinkArrow" layoutpos="right"/>
-						<RichText class="CommandLinkHeader" layoutpos="top" content="Patch your system"/>
-						<RichText class="CommandLinkInstruction" layoutpos="top" content="Proceed to install Rectify11 on your PC"/>
+						<RichText class="CommandLinkHeader" layoutpos="top" content="Install on this PC"/>
+						<RichText class="CommandLinkInstruction" layoutpos="top" content="Apply Rectify12 resources and components to the current Windows installation"/>
 					</TouchButton>
 					<TouchButton id="atom(PatchISO)" class="CommandLink" visible="false" layout="borderlayout()" margin="rect(0,0,0,5rp)">
 						<Richtext class="CommandLinkIcon" layoutpos="left" content="resstr(106)"/>
 						<Richtext class="CommandLinkArrow" layoutpos="right"/>
-						<RichText class="CommandLinkHeader" layoutpos="top" content="Patch an ISO file"/>
-						<RichText class="CommandLinkInstruction" layoutpos="top" content="Install Rectify11 on a Windows 11 ISO file"/>
+						<RichText class="CommandLinkHeader" layoutpos="top" content="Service an ISO image"/>
+						<RichText class="CommandLinkInstruction" layoutpos="top" content="Prepare a Windows image with Rectify12 components (not available yet)"/>
 					</TouchButton>
 				</Element>
 			</Element>

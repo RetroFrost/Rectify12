@@ -6,13 +6,13 @@
 				<Element width="250rp" direction="ltr" height="250rp" background="resbmp(1,7,-1,0,0,1,1,library(PageRes.dll))"/>
 			</Element>
 			<Element layout="borderlayout()" layoutpos="left">
-				<Richtext class="headertext" layoutpos="top" content="Welcome"/>
+				<Richtext class="headertext" layoutpos="top" content="Welcome to Rectify12"/>
 				<Richtext class="instructiontext" layoutpos="top"
-				content="Welcome to Rectify11 Installation Wizard. It is recommended to save all your work and close all the apps."/>
+				content="A calm, glass-first Windows experience inspired by the supplied concept video. Save your work and close other apps before continuing."/>
 				<Richtext class="instructiontext" layoutpos="top"
-				content="Please read notes and credits before proceeding, click Next to proceed, Exit to cancel the installation."/>
+				content="Setup remains visible while it checks compatibility, prepares recovery, applies optional integrations, and installs Rectify12-owned components."/>
 				<Richtext class="instructiontext" foreground="rgb(236,64,78)" layoutpos="top"
-				content="Warning: This is a beta build of Rectify11, do NOT use it on your main PC."/>
+				content="Warning: Rectify12 is currently a development build. Test it on a disposable Windows installation or VM first."/>
 				<Element layout="borderlayout()" layoutpos="top">
 					<Element layout="flowlayout()" padding="rect(10rp,15rp,0,0)"  layoutpos="left">
 						<TouchButton class="NormalButton" id="atom(credits)" height="35rp" width="140rp" content="Credits"/>
@@ -22,3 +22,4 @@
 		</Element>
 	</Element>
 </duixml>
+

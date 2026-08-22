@@ -8,7 +8,6 @@
 #include "Logger.h"
 #include "DirectUI/DirectUI.h"
 
-using namespace std;
 using namespace DirectUI;
 
 extern unsigned long dKey;
@@ -44,8 +43,8 @@ extern Element* nMain;
 extern NativeHWNDHost* pwndCredits;
 extern Element* cMain;
 
-extern vector<Element*> pageArr;
-extern vector<Element*> animArr;
+extern std::vector<Element*> pageArr;
+extern std::vector<Element*> animArr;
 
 extern Element* progressbar;
 extern TouchButton* Nxt;

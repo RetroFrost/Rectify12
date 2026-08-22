@@ -3,88 +3,245 @@
 #include "resource.h"
 #include "framework.h"
 #include "Navigation.h"
+#include "ProductInfo.h"
 
-wchar_t exepath[MAX_PATH];
+#include <algorithm>
+#include <filesystem>
+#include <string>
+#include <vector>
 
-void RemoveWHMods() {
+namespace {
+    constexpr wchar_t DefenderBackupKey[] = L"SOFTWARE\\Rectify12\\DefenderBackup";
 
+    bool DeleteValueIfPresent(HKEY root, const wchar_t* subkey, const wchar_t* valueName, const wchar_t* description) {
+        const LSTATUS result = RegDeleteKeyValueW(root, subkey, valueName);
+        if (result == ERROR_SUCCESS || result == ERROR_FILE_NOT_FOUND || result == ERROR_PATH_NOT_FOUND) {
+            return true;
+        }
 
-	if (InstallFlags[L"INSTALLTHEMES"] == true) {
+        InstallationLogger.WriteLine(
+            L"Could not remove " + std::wstring(description) + L". Win32 error: " + std::to_wstring(result));
+        return false;
+    }
 
-		InstallationLogger.WriteLine(L"Uninstalling sound hook...");
+    bool ReadBackupDword(HKEY key, const wchar_t* name, DWORD& value) {
+        DWORD size = sizeof(value);
+        return RegGetValueW(key, nullptr, name, RRF_RT_REG_DWORD, nullptr, &value, &size) == ERROR_SUCCESS;
+    }
 
-		StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-		wchar_t args[] = L"/c reg delete HKLM\\SOFTWARE\\Windhawk\\Engine\\Mods\\logon-logoff-shutdown-sounds /f";
-		RunEXE(exepath, args);
+    const wchar_t* PowerShellBool(DWORD value) {
+        return value ? L"$true" : L"$false";
+    }
 
-		InstallationLogger.WriteLine(L"Uninstalling titlebar fix...");
+    bool SetRunOnceTheme(const wchar_t* themeFile) {
+        if (!themeFile || !*themeFile) return false;
 
-		StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-		wchar_t args3[] = L"/c reg delete HKLM\\SOFTWARE\\Windhawk\\Engine\\Mods\\local@titlebar-fix /f";
-		RunEXE(exepath, args3);
+        wchar_t themePath[MAX_PATH]{};
+        if (FAILED(StringCchPrintfW(themePath, ARRAYSIZE(themePath), L"%s\\resources\\themes\\%s", windir, themeFile))) {
+            InstallationLogger.WriteLine(L"Theme restore path exceeded the current installer buffer.");
+            return false;
+        }
 
-	}
-	if (InstallFlags[L"INSTALLICONS"] == true) {
+        const std::wstring command = L"explorer.exe \"" + std::wstring(themePath) + L"\"";
+        HKEY runOnce = nullptr;
+        DWORD disposition = 0;
+        const LSTATUS createResult = RegCreateKeyExW(
+            HKEY_LOCAL_MACHINE,
+            L"Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce",
+            0,
+            nullptr,
+            0,
+            KEY_SET_VALUE,
+            nullptr,
+            &runOnce,
+            &disposition);
+        if (createResult != ERROR_SUCCESS) {
+            InstallationLogger.WriteLine(L"Could not open RunOnce for theme restore. Win32 error: " + std::to_wstring(createResult));
+            return false;
+        }
 
-		InstallationLogger.WriteLine(L"Uninstalling resource redirect...");
+        const DWORD bytes = static_cast<DWORD>((command.size() + 1) * sizeof(wchar_t));
+        const LSTATUS writeResult = RegSetValueExW(
+            runOnce,
+            L"Rectify12ApplyTheme",
+            0,
+            REG_SZ,
+            reinterpret_cast<const BYTE*>(command.c_str()),
+            bytes);
+        RegCloseKey(runOnce);
 
-		StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-		wchar_t args[] = L"/c reg delete HKLM\\SOFTWARE\\Windhawk\\Engine\\Mods\\icon-resource-redirect /f";
-		RunEXE(exepath, args);
-	}
-	if (InstallFlags[L"INSTALLASDF"] == true) {
+        if (writeResult != ERROR_SUCCESS) {
+            InstallationLogger.WriteLine(L"Could not schedule Windows theme restore. Win32 error: " + std::to_wstring(writeResult));
+            return false;
+        }
+        return true;
+    }
 
-		InstallationLogger.WriteLine(L"Uninstalling Accent Colorizer...");
+    bool ScheduleInstallDirectoryRemoval() {
+        const std::filesystem::path root(r11targetdir);
+        std::error_code existsError;
+        if (!std::filesystem::exists(root, existsError)) {
+            if (existsError) {
+                InstallationLogger.WriteLine(L"Could not inspect the Rectify12 install directory. Error: " + std::to_wstring(existsError.value()));
+                return false;
+            }
+            return true;
+        }
 
-		StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-		wchar_t args[] = L"/c reg delete HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run /f /v ASDF";
-		RunEXE(exepath, args);
-	}
-	if (InstallFlags[L"INSTALLWINVERSHUTDOWN"] == true) {
+        std::vector<std::filesystem::path> entries;
+        std::error_code iterateError;
+        std::filesystem::recursive_directory_iterator iterator(
+            root,
+            std::filesystem::directory_options::skip_permission_denied,
+            iterateError);
+        const std::filesystem::recursive_directory_iterator end;
 
-		InstallationLogger.WriteLine(L"Uninstalling winver and shutdown...");
+        while (!iterateError && iterator != end) {
+            entries.push_back(iterator->path());
+            iterator.increment(iterateError);
+        }
+        if (iterateError) {
+            InstallationLogger.WriteLine(L"Could not enumerate Rectify12 files for reboot cleanup. Error: " + std::to_wstring(iterateError.value()));
+            return false;
+        }
 
-		StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-		wchar_t args[] = L"/c reg delete HKLM\\SOFTWARE\\Windhawk\\Engine\\Mods\\winvershutdown /f";
-		RunEXE(exepath, args);
-	}
-	if (InstallFlags[L"INSTALLEXP"] == true) {
+        std::reverse(entries.begin(), entries.end());
+        for (const auto& entry : entries) {
+            if (!MoveFileExW(entry.c_str(), nullptr, MOVEFILE_DELAY_UNTIL_REBOOT)) {
+                const DWORD error = GetLastError();
+                if (error != ERROR_FILE_NOT_FOUND && error != ERROR_PATH_NOT_FOUND) {
+                    InstallationLogger.WriteLine(
+                        L"Could not schedule deletion of " + entry.wstring() + L". Win32 error: " + std::to_wstring(error));
+                    return false;
+                }
+            }
+        }
 
-		InstallationLogger.WriteLine(L"Uninstalling explorer tweaks...");
+        if (!MoveFileExW(root.c_str(), nullptr, MOVEFILE_DELAY_UNTIL_REBOOT)) {
+            const DWORD error = GetLastError();
+            if (error != ERROR_FILE_NOT_FOUND && error != ERROR_PATH_NOT_FOUND) {
+                InstallationLogger.WriteLine(L"Could not schedule removal of the Rectify12 install directory. Win32 error: " + std::to_wstring(error));
+                return false;
+            }
+        }
+        return true;
+    }
+}
 
-		StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-		wchar_t args[] = L"/c reg delete HKLM\\SOFTWARE\\Windhawk\\Engine\\Mods\\windows-11-file-explorer-styler /f";
-		RunEXE(exepath, args);
-	}
+bool RestoreDefenderSettingsIfNeeded() {
+    HKEY backupKey = nullptr;
+    const LSTATUS openResult = RegOpenKeyExW(HKEY_LOCAL_MACHINE, DefenderBackupKey, 0, KEY_READ, &backupKey);
+    if (openResult == ERROR_FILE_NOT_FOUND || openResult == ERROR_PATH_NOT_FOUND) {
+        return true;
+    }
+    if (openResult != ERROR_SUCCESS) {
+        InstallationLogger.WriteLine(L"Could not open the Rectify12 Defender rollback snapshot. Win32 error: " + std::to_wstring(openResult));
+        return false;
+    }
+
+    DWORD version = 0;
+    DWORD cpu = 0;
+    DWORD lowPriority = 0;
+    DWORD idleOnly = 0;
+    DWORD disableIdleThrottle = 0;
+    const bool complete =
+        ReadBackupDword(backupKey, L"Version", version) && version == 1 &&
+        ReadBackupDword(backupKey, L"ScanAvgCPULoadFactor", cpu) &&
+        ReadBackupDword(backupKey, L"EnableLowCpuPriority", lowPriority) &&
+        ReadBackupDword(backupKey, L"ScanOnlyIfIdleEnabled", idleOnly) &&
+        ReadBackupDword(backupKey, L"DisableCpuThrottleOnIdleScans", disableIdleThrottle);
+    RegCloseKey(backupKey);
+
+    if (!complete || lowPriority > 1 || idleOnly > 1 || disableIdleThrottle > 1 || cpu > 100) {
+        InstallationLogger.WriteLine(L"The Rectify12 Defender rollback snapshot is incomplete or invalid; refusing to erase it during uninstall.");
+        return false;
+    }
+
+    wchar_t powershell[MAX_PATH]{};
+    if (FAILED(StringCchPrintfW(
+            powershell,
+            ARRAYSIZE(powershell),
+            L"%s\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            windir))) {
+        InstallationLogger.WriteLine(L"PowerShell path exceeded the current installer buffer.");
+        return false;
+    }
+
+    std::wstring command =
+        L"-NoLogo -NoProfile -NonInteractive -Command \"$ErrorActionPreference='Stop'; "
+        L"Set-MpPreference -ScanAvgCPULoadFactor " + std::to_wstring(cpu) +
+        L" -EnableLowCpuPriority " + PowerShellBool(lowPriority) +
+        L" -ScanOnlyIfIdleEnabled " + PowerShellBool(idleOnly) +
+        L" -DisableCpuThrottleOnIdleScans " + PowerShellBool(disableIdleThrottle) +
+        L"; $p=Get-MpPreference; if(([int]$p.ScanAvgCPULoadFactor -ne " + std::to_wstring(cpu) +
+        L") -or ([bool]$p.EnableLowCpuPriority -ne " + PowerShellBool(lowPriority) +
+        L") -or ([bool]$p.ScanOnlyIfIdleEnabled -ne " + PowerShellBool(idleOnly) +
+        L") -or ([bool]$p.DisableCpuThrottleOnIdleScans -ne " + PowerShellBool(disableIdleThrottle) +
+        L")){ throw 'Defender rollback verification failed.' }; exit 0\"";
+
+    std::vector<wchar_t> mutableCommand(command.begin(), command.end());
+    mutableCommand.push_back(L'\0');
+    const ProcessResult result = RunEXE(powershell, mutableCommand.data(), 120000);
+    if (!result.success) {
+        InstallationLogger.WriteLine(L"Could not restore the Defender settings saved by Rectify12. The rollback snapshot will be kept.");
+        return false;
+    }
+
+    InstallationLogger.WriteLine(L"Restored the exact Microsoft Defender scan settings saved before Rectify12 optimisation.");
+    return true;
+}
+
+bool RemoveRectifyTweaks() {
+    // Rectify12 no longer owns or installs Windhawk modules, so uninstall must never
+    // delete Windhawk state that may belong to the user or another product.
+    bool success = true;
+
+    if (InstallFlags[L"INSTALLASDF"]) {
+        InstallationLogger.WriteLine(L"Uninstalling Accent Colorizer startup entry...");
+        success = DeleteValueIfPresent(
+            HKEY_LOCAL_MACHINE,
+            L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+            L"ASDF",
+            L"Rectify12 Accent Colorizer startup entry") && success;
+    }
+
+    return success;
 }
 
 void RemoveSecureUX() {
-	if (InstallFlags[L"INSTALLTHEMES"] == true) {
-
-		InstallationLogger.WriteLine(L"Uninstalling secureuxtheme...");
-
-	}
+    if (InstallFlags[L"INSTALLTHEMES"]) {
+        // SecureUxTheme can be shared with other custom themes, so Rectify12 must not
+        // remove it blindly. A future ownership record will allow safe removal when
+        // Rectify12 was the component that installed it.
+        InstallationLogger.WriteLine(L"Leaving SecureUxTheme installed to avoid removing a shared dependency.");
+    }
 }
 
-void FinaliseUninstall() {
-	if (InstallFlags[L"INSTALLTHEMES"] == true) {
+bool FinaliseUninstall() {
+    if (InstallFlags[L"INSTALLTHEMES"]) {
+        InstallationLogger.WriteLine(L"Restoring a Windows theme on next sign-in...");
+        if (InstallFlags[L"LIGHTTHEME"] && !SetRunOnceTheme(L"aero.theme")) return false;
+        if (InstallFlags[L"DARKTHEME"] && !SetRunOnceTheme(L"dark.theme")) return false;
+    }
 
-		InstallationLogger.WriteLine(L"Finishing uninstallation...");
+    if (!ScheduleInstallDirectoryRemoval()) {
+        return false;
+    }
 
-		if (InstallFlags[L"LIGHTTHEME"] == true) {
-			StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-			wchar_t args[] = L"/c reg add HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce /v ApplyTheme /t REG_SZ /d \"cmd.exe /c %systemroot%\\resources\\themes\\aero.theme\"";
-			RunEXE(exepath, args);
-		}
-		if (InstallFlags[L"DARKTHEME"] == true) {
-			StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-			wchar_t args[] = L"/c reg add HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce /v ApplyTheme /t REG_SZ /d \"cmd.exe /c %systemroot%\\resources\\themes\\dark.theme\"";
-			RunEXE(exepath, args);
-		}
+    const LSTATUS uninstallDelete = RegDeleteTreeW(HKEY_LOCAL_MACHINE, Rectify12::UninstallRegistryPath);
+    if (uninstallDelete != ERROR_SUCCESS && uninstallDelete != ERROR_FILE_NOT_FOUND && uninstallDelete != ERROR_PATH_NOT_FOUND) {
+        InstallationLogger.WriteLine(L"Could not remove Rectify12 uninstall registration. Win32 error: " + std::to_wstring(uninstallDelete));
+        return false;
+    }
 
-	}
-	StringCchPrintf(exepath, MAX_PATH, L"%s\\System32\\cmd.exe", windir);
-	wchar_t args[] = L"/c reg delete HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Rectify /f";
-	RunEXE(exepath, args);
+    const LSTATUS productDelete = RegDeleteTreeW(HKEY_LOCAL_MACHINE, L"Software\\Rectify12");
+    if (productDelete != ERROR_SUCCESS && productDelete != ERROR_FILE_NOT_FOUND && productDelete != ERROR_PATH_NOT_FOUND) {
+        InstallationLogger.WriteLine(L"Could not remove Rectify12 product registration. Win32 error: " + std::to_wstring(productDelete));
+        return false;
+    }
+
+    // Per-user visual preferences are intentionally retained. This means a reinstall
+    // restores the user's Rectify12 effects choices instead of silently resetting them.
+    InstallationLogger.WriteLine(L"Rectify12 product registration removed; user visual preferences retained. Installed Rectify12 files are scheduled for deletion on reboot.");
+    return true;
 }
-

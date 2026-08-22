@@ -1,40 +1,44 @@
 #include "Logger.h"
-#include "framework.h"
-using namespace std;
-
 
 void Logger::StartLogger(const wchar_t* filename) {
-	logfile.open(filename, wfstream::binary | wfstream::out | wfstream::app);
+	logfile.open(filename, std::wfstream::binary | std::wfstream::out | std::wfstream::app);
 	if (!logfile)
-		logfile.open(filename, wfstream::binary | wfstream::trunc | wfstream::out);
+		logfile.open(filename, std::wfstream::binary | std::wfstream::trunc | std::wfstream::out);
 
-	logfile << "\n\n";
-	time_t _tm = time(NULL);
-	tm curtime;
-	localtime_s(&curtime, &_tm);
-	char t[256];
-	asctime_s(t, &curtime);
-	wstring wt = wstring_convert<codecvt_utf8<wchar_t>>().from_bytes(t);
-	wt.erase(remove(wt.begin(), wt.end(), L'\n'), wt.cend());
-	if (logfile.good())logfile << "================ Logging started at " << wt << L" ================\n" << endl;
-}
+	logfile << L"\n\n";
+	const std::time_t now = std::time(nullptr);
+	std::tm localTime{};
+	localtime_s(&localTime, &now);
 
-void Logger::WriteLine(wstring line) {
-	std::lock_guard<std::mutex> lock(mutex);
-	if (logfile.is_open()) { 
-		logfile << line << endl;
+	wchar_t timestamp[64]{};
+	if (std::wcsftime(timestamp, std::size(timestamp), L"%Y-%m-%d %H:%M:%S", &localTime) == 0) {
+		wcscpy_s(timestamp, L"unknown time");
+	}
+
+	if (logfile.good()) {
+		logfile << L"================ Logging started at " << timestamp << L" ================\n";
 		logfile.flush();
 	}
 }
 
-void Logger::WriteLine(wstring line, int exitCode) {
-	std::lock_guard<std::mutex> lock(mutex);
-	if (logfile.is_open()) { 
-		logfile << line << L" (exit code: " << to_wstring(exitCode) << L")" << endl; 
+void Logger::WriteLine(const std::wstring& line) {
+	std::lock_guard lock(mutex);
+	if (logfile.is_open()) {
+		logfile << line << L'\n';
+		logfile.flush();
+	}
+}
+
+void Logger::WriteLine(const std::wstring& line, int exitCode) {
+	std::lock_guard lock(mutex);
+	if (logfile.is_open()) {
+		logfile << line << L" (exit code: " << std::to_wstring(exitCode) << L")\n";
 		logfile.flush();
 	}
 }
 
 Logger::~Logger() {
-	logfile.close();
+	if (logfile.is_open()) {
+		logfile.close();
+	}
 }
