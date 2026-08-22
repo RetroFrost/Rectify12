@@ -28,6 +28,8 @@ This document defines the intended installation and uninstallation behaviour for
 - Rectify12 launches the AME Wizard stage as part of setup and supplies the AtlasOS Playbook.
 - Required/recommended Rectify12 Atlas options should already be selected when the user reaches the AME Wizard option pages.
 - AME Wizard remains visible to the user; this is not intended to be a hidden/headless Atlas installation.
+- Automation must not make this stage silent: AME Wizard stays visible, the selected options remain reviewable, and progress, warnings, failures, and restart decisions are shown to the user.
+- Rectify12 may prepare inputs and guide the visible flow, but it must not simulate acceptance of safety warnings or hide third-party licence/consent screens.
 - Rectify12 must persist its setup state before any reboot initiated by this stage.
 
 ## Resume after reboot

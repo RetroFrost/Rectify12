@@ -401,18 +401,22 @@ namespace Rectify12::SystemActions {
                 : (rectifyError ? L"The install directory could not be inspected." : rectifyRoot.wstring())
         });
 
-        const std::wstring programData = EnvironmentValue(L"ProgramData");
-        const std::filesystem::path windhawkMods = programData.empty()
-            ? std::filesystem::path{}
-            : std::filesystem::path(programData) / L"Windhawk" / L"Engine" / L"Mods";
-        std::error_code windhawkError;
-        const bool windhawkExists = !windhawkMods.empty() && std::filesystem::exists(windhawkMods, windhawkError);
+        wchar_t productVersion[128]{};
+        DWORD productVersionBytes = sizeof(productVersion);
+        const LSTATUS productVersionResult = RegGetValueW(
+            HKEY_LOCAL_MACHINE,
+            L"Software\\Rectify12",
+            L"Version",
+            RRF_RT_REG_SZ,
+            nullptr,
+            productVersion,
+            &productVersionBytes);
         items.push_back({
-            L"Windhawk modules",
-            windhawkExists && !windhawkError,
-            windhawkMods.empty()
-                ? L"ProgramData could not be resolved."
-                : (windhawkError ? L"The Windhawk modules directory could not be inspected." : windhawkMods.wstring())
+            L"Rectify12 direct-patch registration",
+            productVersionResult == ERROR_SUCCESS && productVersion[0] != L'\0',
+            productVersionResult == ERROR_SUCCESS && productVersion[0] != L'\0'
+                ? L"Registered Rectify12 version: " + std::wstring(productVersion)
+                : L"Rectify12 product registration is missing or unreadable."
         });
 
         DWORD effectsEnabled = 0;

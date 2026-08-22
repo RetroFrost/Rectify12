@@ -9,7 +9,7 @@
 
 namespace Rectify12::Cursors {
     inline constexpr wchar_t BackupKey[] = L"Software\\Rectify12\\CursorBackup";
-    inline constexpr wchar_t ExpectedArchiveHash[] = L"ACCCCC09185E33157E710BBE99F3F8E89EDC32A726788F0235DC57E2510456CA";
+    inline constexpr wchar_t ExpectedArchiveHash[] = L"04C9A4797F02AB88FD5DF15A9377A32B3F66497F05CAF89460F3441968A7024C";
 
     struct CursorValue {
         const wchar_t* registryName;
